@@ -1,0 +1,68 @@
+.navigation {
+  position: fixed;
+  top: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: calc(100% - 3rem);
+  max-width: 1200px;
+
+  padding: 0.75rem 1.25rem;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  z-index: 10000;
+
+  background: rgba(20, 16, 24, 0.45);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.nav-tagline {
+  font-family: "Panchang-Light";
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+
+  color: rgba(200, 190, 225, 0.75);
+}
+
+.navigation img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.navigation a:hover img {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.navLinks {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .nav-tagline {
+    font-size: 0.7rem;
+  }
+
+  .navigation {
+    top: 0.75rem;
+    padding: 0.6rem 1rem;
+  }
+}

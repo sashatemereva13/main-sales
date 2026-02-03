@@ -1,0 +1,518 @@
+/* ======================================
+  ✨ Quiz Layout
+====================================== */
+.quiz {
+  margin: 5rem 0;
+
+  display: grid;
+  grid-template-columns:
+    1fr
+    minmax(0, 720px)
+    1fr;
+}
+.quiz > * {
+  grid-column: 2;
+}
+
+/* =========================
+   ✏️ Question Text (Premium)
+========================= */
+.quiz-section {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+.quiz-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh; /* 👈 FIXED VISUAL SPACE */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.quiz-foreground {
+  position: relative;
+  z-index: 2;
+}
+
+.question-wrapper {
+  max-width: 720px;
+  margin: 0 auto 3rem;
+  padding: 0 1rem;
+}
+.quiz-prompt {
+  font-family: "Panchang-Light";
+  font-size: clamp(1.6rem, 2.2vw, 2.2rem);
+  line-height: 1.3;
+  text-align: center;
+  letter-spacing: -0.015em;
+  color: rgba(240, 230, 255, 0.95);
+}
+
+/* ======================================
+  🎯 Choices Layout
+====================================== */
+.quizChoice {
+  position: relative;
+  width: 100%;
+  margin: 3rem 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ======================================
+  🧩 Choice Cards
+====================================== */
+.choice-card {
+  cursor: pointer;
+  height: 200px;
+  width: 200px;
+  max-width: 100%;
+  padding: 1rem 2rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  border-radius: 1.2rem;
+
+  /* 🧊 Glass base */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08),
+    rgba(180, 140, 255, 0.05)
+  );
+
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  transition:
+    transform 0.4s ease,
+    box-shadow 0.4s ease,
+    background 0.4s ease;
+}
+
+.choice-card:hover {
+  transform: translateY(-4px);
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12),
+    rgba(200, 160, 255, 0.08)
+  );
+
+  box-shadow:
+    inset 0 0 1px rgba(255, 255, 255, 0.8),
+    0 18px 44px rgba(160, 120, 255, 0.22);
+}
+
+.choice-image {
+  width: 100%;
+  height: 10rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* =========================
+   🧩 Choice Text (Premium)
+========================= */
+
+.choice-text {
+  position: absolute;
+  /* z-index: 100; */
+  inset: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 1.2rem 0.8rem;
+  pointer-events: none;
+}
+
+/* Main label */
+.choice-label {
+  color: rgba(235, 210, 255, 0.95);
+  font-family: "Panchang-Light";
+  font-size: 0.95rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-align: center;
+
+  margin-bottom: 0.35rem;
+
+  text-shadow:
+    0 0 12px rgba(180, 140, 240, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+/* Caption / explanation */
+.choice-caption {
+  font-size: 0.72rem;
+  line-height: 1.4;
+  text-align: center;
+
+  color: rgba(210, 190, 230, 0.7);
+
+  max-width: 90%;
+  opacity: 0.45;
+
+  transition: opacity 0.35s ease;
+}
+
+/* Hover refinement */
+.choice-card:hover .choice-caption {
+  opacity: 0.9;
+  text-shadow:
+    0 0 18px rgba(200, 160, 255, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.canvas-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  /* UI integration */
+  mask-image: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 1) 40%,
+    rgba(0, 0, 0, 0.6) 65%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  opacity: 0.6;
+}
+
+.choice-overlay {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  z-index: 10;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+/* =========================
+   Progress Indicator
+========================= */
+
+.progress-container {
+  max-width: 420px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(200, 180, 220, 0.7);
+  margin-bottom: 0.6rem;
+}
+
+.progress-track {
+  position: relative;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.progress-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(200, 160, 255, 0.6),
+    rgba(160, 220, 255, 0.8)
+  );
+  transform-origin: left;
+  transition: transform 0.45s ease;
+  box-shadow: 0 0 8px rgba(180, 160, 255, 0.5);
+}
+
+/* ======================================
+  📋 Summary Section
+====================================== */
+.quiz-summary h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.quiz-summary ul {
+  text-align: left;
+  list-style: none;
+  padding: 0;
+}
+
+.quiz-summary ul li {
+  margin-bottom: 1rem;
+}
+
+/* ======================================
+   ✨ Quiz Navigation Buttons (Refined)
+====================================== */
+
+.back-button,
+.next-button {
+  background: transparent;
+  border: none;
+  padding: 0.4rem 0;
+  font-family: "Panchang-Light";
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(220, 200, 255, 0.65);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.35s ease;
+}
+
+/* subtle underline energy */
+.back-button::after,
+.next-button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 0%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(200, 160, 255, 0.8),
+    rgba(160, 220, 255, 0.8)
+  );
+  transition: width 0.45s ease;
+}
+
+.back-button:hover,
+.next-button:hover {
+  color: rgba(245, 235, 255, 0.95);
+}
+
+.back-button:hover::after,
+.next-button:hover::after {
+  width: 100%;
+}
+
+/* disabled state */
+.next-button:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.quiz-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* ======================================
+  📝 Text Input Fields
+====================================== */
+.text-input-group input.text-input {
+  width: 100%;
+  padding: 0.8rem 0;
+
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(200, 180, 220, 0.35);
+  border-radius: 0;
+
+  font-size: 1.05rem;
+  color: rgba(235, 215, 255, 0.95);
+
+  outline: none;
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.text-input-group input.text-input::placeholder {
+  color: rgba(200, 180, 220, 0.35);
+}
+
+.text-input-group input.text-input:focus {
+  border-bottom-color: rgba(200, 160, 255, 0.9);
+  box-shadow: 0 10px 40px rgba(160, 120, 255, 0.15);
+}
+/* ======================================
+  🚀 Submit Button
+
+====================================== */
+
+.submit-button {
+  margin-top: 3rem;
+  padding: 1rem 2rem;
+  width: auto;
+  max-width: none;
+
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  border: 1px solid rgba(200, 160, 255, 0.18);
+
+  font-family: "Panchang-Light";
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(235, 215, 255, 0.95);
+
+  backdrop-filter: blur(14px);
+  cursor: pointer;
+
+  transition:
+    background 0.4s ease,
+    box-shadow 0.4s ease,
+    transform 0.3s ease;
+}
+
+.submit-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(220, 180, 255, 0.25),
+    0 20px 50px rgba(160, 120, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   🪞 Final Summary (Premium)
+========================= */
+
+.quiz-summary {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+}
+
+/* Title */
+.summary-title {
+  font-family: "Panchang-Light";
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: rgba(235, 215, 255, 0.95);
+  margin-bottom: 2.5rem;
+  text-shadow: 0 0 24px rgba(180, 140, 240, 0.35);
+}
+
+/* Tier card */
+.tier-card {
+  display: inline-block;
+  padding: 1.6rem 2.4rem;
+  border-radius: 1.2rem;
+  margin-bottom: 2.5rem;
+
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 0 1px rgba(200, 160, 255, 0.15),
+    0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.tier-eyebrow {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(200, 180, 220, 0.6);
+  margin-bottom: 0.4rem;
+}
+
+.tier-name {
+  font-family: "Panchang-Light";
+  font-size: 1.3rem;
+  color: rgba(235, 210, 255, 0.95);
+}
+
+/* Summary paragraph */
+.client-summary {
+  max-width: 620px;
+  margin: 0 auto 3rem;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(210, 195, 230, 0.85);
+}
+
+/* Collapsible answers */
+.answers-details {
+  margin: 2rem auto 3rem;
+  max-width: 620px;
+  text-align: left;
+}
+
+.answers-details summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: rgba(200, 180, 220, 0.75);
+  margin-bottom: 1.2rem;
+}
+
+.answers-list {
+  list-style: none;
+  padding: 0;
+}
+
+.answer-item {
+  margin-bottom: 1.4rem;
+}
+
+.answer-question {
+  font-size: 0.75rem;
+  color: rgba(200, 180, 220, 0.55);
+  margin-bottom: 0.2rem;
+}
+
+.answer-value {
+  font-size: 0.95rem;
+  color: rgba(230, 215, 255, 0.9);
+}
+
+/* ======================================
+  📱 Mobile Responsive
+====================================== */
+@media (max-width: 640px) {
+  .quiz {
+    margin: 2rem 0;
+    padding: 0 0.5rem;
+  }
+
+  .quizChoice {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .choice-card {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .choice-image {
+    height: 6rem;
+  }
+
+  .choice-label {
+    font-size: 0.9rem;
+  }
+
+  .quiz-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .submit-button {
+    width: 100%;
+    max-width: none;
+  }
+}

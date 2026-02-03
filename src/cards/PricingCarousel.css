@@ -1,0 +1,207 @@
+/* ================================
+   DESIGN TOKENS & VARIABLES
+================================== */
+:root {
+  --maxw: 1200px;
+  --gap: 2rem; /* JS reads this */
+  --cardRadius: 16px;
+  --cardPeek: 64%;
+  --btnSize: 52px;
+}
+
+/* ================================
+   WRAPPER
+================================== */
+.pricing-carousel {
+  position: relative;
+  max-width: min(var(--maxw), 92vw);
+  margin: 0 auto;
+  padding-left: var(--pageX);
+  padding-right: var(--pageX);
+}
+
+/* ================================
+   HEADER
+================================== */
+.carousel-head {
+  max-width: 680px;
+  margin: 0 auto 1.5rem;
+  padding: 0 0.75rem;
+}
+
+.carousel-title {
+  font-size: clamp(1.3rem, 1.1rem + 1vw, 1.8rem);
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.4px;
+}
+
+.carousel-subtitle {
+  font-size: 0.95rem;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+/* ================================
+   TRACK / RAIL
+================================== */
+.rail {
+  display: flex;
+  column-gap: var(--gap);
+  padding: 0.5rem 0.75rem;
+  cursor: grab;
+  user-select: none;
+  will-change: transform;
+}
+
+.rail:active {
+  cursor: grabbing;
+}
+
+/* ================================
+   CARD
+================================== */
+.card {
+  flex: 0 0 var(--cardPeek);
+  min-width: 280px;
+  border-radius: var(--cardRadius);
+  padding: 1.4rem 1.4rem 1.2rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    opacity 200ms ease;
+}
+
+.card.is-inactive {
+  opacity: 0.55;
+}
+
+.card.is-active {
+  opacity: 1;
+  border-color: rgba(186, 255, 243, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.card:is(:hover, :focus-visible) {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+/* ================================
+   CARD CONTENT
+================================== */
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.6rem;
+}
+
+.card-title {
+  font-size: 1.15rem;
+  margin: 0;
+  color: #57d6c3;
+}
+
+.price {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #b5fff4;
+}
+
+.card-intent {
+  font-size: 0.95rem;
+  opacity: 0.8;
+  margin-bottom: 0.75rem;
+}
+
+/* ================================
+   FEATURES
+================================== */
+.features {
+  margin: 0 0 0.9rem;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+}
+
+.features li {
+  margin: 0.2rem 0;
+  line-height: 1.45;
+}
+
+/* ================================
+   EXAMPLE LINK
+================================== */
+.example-link {
+  font-size: 0.9rem;
+  color: #7dffeb;
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+.example-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ================================
+   CONTROLS
+================================== */
+.controls {
+  display: grid;
+  grid-template-columns: var(--btnSize) 1fr var(--btnSize);
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 0.75rem 0;
+}
+
+.nav-btn {
+  width: var(--btnSize);
+  height: var(--btnSize);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e7fffb;
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.nav-btn:not(:disabled):hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 6px rgba(181, 255, 244, 0.12);
+}
+
+.nav-btn:disabled {
+  opacity: 0.35;
+}
+
+/* ================================
+   DOTS
+================================== */
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+}
+
+.dot.is-active {
+  background: #b5fff4;
+  border-color: #b5fff4;
+  transform: scale(1.25);
+}

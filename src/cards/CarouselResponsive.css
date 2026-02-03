@@ -1,0 +1,38 @@
+/* ================================
+   MOBILE OVERRIDES
+================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --gap: 1.25rem;
+    --cardPeek: 70%;
+    --btnSize: 44px;
+  }
+
+  .carousel-head {
+    padding: 0 0.5rem;
+  }
+
+  .carousel-title {
+    font-size: 1.2rem;
+  }
+
+  .card {
+    padding: 1.2rem 1.1rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    min-width: calc(100vw - 2rem);
+  }
+}
+
+/* Very small phones */
+@media (max-width: 420px) {
+  .controls {
+    grid-template-columns: 1fr;
+    row-gap: 0.75rem;
+    justify-items: center;
+  }
+}

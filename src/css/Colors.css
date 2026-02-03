@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Outfit:wght@300;500&display=swap");
+
+body {
+  background-color: #000000;
+  font-family: "Outfit", sans-serif;
+}
+
+.slideshow-container {
+  position: relative;
+  width: 90%;
+  max-width: 800px;
+  margin: 60px auto;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+}
+
+.slide {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  transition: opacity 1s ease-in-out;
+}
+
+.slide.active {
+  opacity: 1;
+  position: relative;
+}
+
+.palette {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.two-colors .color {
+  flex: 1 1 50%;
+}
+
+.multi .color {
+  flex: 1 1 33%;
+}
+
+.color {
+  padding: 40px 20px;
+  text-align: center;
+  color: #1c1c1c;
+  transition: transform 0.3s ease;
+}
+
+.color:hover {
+  transform: scale(1.03);
+}
+
+.color h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+
+.color p {
+  font-family: "Outfit", sans-serif;
+  font-size: 0.9rem;
+  margin: 3px 0;
+}
+
+/* Navigation */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: #ffffff;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.nav:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.prev {
+  left: 15px;
+}
+.next {
+  right: 15px;
+}
+
+@media (max-width: 600px) {
+  .color {
+    padding: 25px 10px;
+  }
+  .color h2 {
+    font-size: 1.2rem;
+  }
+}
