@@ -32,13 +32,6 @@ function App() {
       <section className="hero">
         <div className="hero-content">
           <HeroTitle />
-
-          <Reveal delay={0.1}>
-            <p className="intro-subtitle">
-              Des sites personnels et immersifs, conçus à partir de votre
-              identité, de vos objectifs et de votre univers.
-            </p>
-          </Reveal>
         </div>
 
         <Reveal delay={0.2}>
