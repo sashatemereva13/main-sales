@@ -3,7 +3,18 @@ const steps = [
   // WHY / INTENT
   // =========================
   {
-    question: "Quel est l’objectif principal de votre site web ?",
+    question: "Quel est votre nom ?",
+    type: "text",
+    key: "name",
+    maxLength: 40,
+    required: true,
+    inputType: "text",
+    scene: "39",
+  },
+
+  {
+    question: "{name}, quel est l’objectif principal de votre site web ?",
+    key: "objective",
     options: [
       {
         label: "Présenter mon travail",
@@ -42,7 +53,8 @@ const steps = [
   // AUDIENCE
   // =========================
   {
-    question: "À qui s’adresse principalement ce site ?",
+    question: "{name}, à qui s’adresse principalement ce site ?",
+    key: "audience",
     options: [
       {
         label: "Clients potentiels",
@@ -72,7 +84,9 @@ const steps = [
   },
 
   {
-    question: "Que souhaitez-vous que les visiteurs fassent en priorité ?",
+    question:
+      "{name}, que souhaitez-vous que les visiteurs fassent en priorité ?",
+    key: "action",
     options: [
       {
         label: "Me contacter",
@@ -105,21 +119,29 @@ const steps = [
   // ACTIVITY & VALUES
   // =========================
   {
-    question: "Comment décririez-vous votre activité ?",
+    question: "{name}, comment décririez-vous votre activité ?",
     type: "text",
     key: "activity",
+    maxLength: 120,
+    required: true,
+    inputType: "text",
     scene: "14",
   },
 
   {
-    question: "Qu’est-ce qui vous différencie des autres dans votre domaine ?",
+    question:
+      "{name}, qu’est-ce qui vous différencie des autres dans votre domaine ?",
     type: "text",
     key: "differentiation",
+    maxLength: 160,
+    required: true,
+    inputType: "text",
     scene: "15",
   },
 
   {
-    question: "Quelle atmosphère souhaitez-vous transmettre ?",
+    question: "{name}, quelle atmosphère souhaitez-vous transmettre ?",
+    key: "vibe",
     options: [
       {
         label: "Minimaliste & épuré",
@@ -158,7 +180,8 @@ const steps = [
   // DESIGN & IMMERSION
   // =========================
   {
-    question: "Avez-vous déjà une idée du style visuel ?",
+    question: "{name}, avez-vous déjà une idée du style visuel ?",
+    key: "design",
     options: [
       {
         label: "Oui, assez précise",
@@ -182,7 +205,8 @@ const steps = [
   },
 
   {
-    question: "Souhaitez-vous un site plutôt classique ou original ?",
+    question: "{name}, souhaitez-vous un site plutôt classique ou original ?",
+    key: "style",
     options: [
       {
         label: "Classique & efficace",
@@ -209,7 +233,8 @@ const steps = [
   // CONTENT
   // =========================
   {
-    question: "Avez-vous déjà les contenus nécessaires ?",
+    question: "{name}, avez-vous déjà les contenus nécessaires ?",
+    key: "content",
     options: [
       {
         label: "Oui, tout est prêt",
@@ -236,7 +261,8 @@ const steps = [
   // FEATURES
   // =========================
   {
-    question: "Quelles fonctionnalités sont importantes pour vous ?",
+    question: "{name}, quelles fonctionnalités sont importantes pour vous ?",
+    key: "features",
     options: [
       {
         label: "Formulaire / contact / réservation",
@@ -267,7 +293,8 @@ const steps = [
 
   {
     question:
-      "Souhaitez-vous pouvoir modifier le contenu vous-même plus tard ?",
+      "{name}, souhaitez-vous pouvoir modifier le contenu vous-même plus tard ?",
+    key: "cms",
     options: [
       {
         label: "Oui",
@@ -288,7 +315,9 @@ const steps = [
   // VISION & COMMITMENT
   // =========================
   {
-    question: "Comment imaginez-vous l’évolution du site dans le temps ?",
+    question:
+      "{name}, comment imaginez-vous l’évolution du site dans le temps ?",
+    key: "vision",
     options: [
       {
         label: "Projet ponctuel",
@@ -314,23 +343,26 @@ const steps = [
   // =========================
   // CONTACT
   // =========================
-  {
-    question: "Quel est votre nom ?",
-    type: "text",
-    key: "name",
-    scene: "39",
-  },
+
   {
     question: "Un lien vers votre site ou Instagram (si vous en avez un)",
     type: "text",
     key: "link",
+    maxLength: 120,
+    required: false,
+    inputType: "url",
     scene: "40",
   },
+
   {
     question:
       "Indiquez votre email pour recevoir votre recommandation personnalisée ✨",
     type: "text",
     key: "email",
+    maxLength: 80,
+    required: true,
+    inputType: "email",
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     scene: "41",
   },
 ];

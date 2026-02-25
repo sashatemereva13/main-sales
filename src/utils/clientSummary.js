@@ -21,10 +21,10 @@ Ce client souhaite ${goalMap[answers.objective] || "clarifier sa présence en li
     answers.audience || "son audience cible"
   }.
 
-Le projet s’inscrit dans une approche ${
+  Le projet s’inscrit dans une approche ${
     vibeMap[answers.vibe] || "personnelle"
   }, avec une volonté ${
-    answers.action_discover
+    answers.action === "action_discover"
       ? "d’inviter les visiteurs à découvrir un univers"
       : "de guider les visiteurs vers une action claire"
   }.

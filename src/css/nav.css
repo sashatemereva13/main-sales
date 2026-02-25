@@ -1,68 +1,367 @@
 .navigation {
+  --ui-ease-premium: cubic-bezier(0.22, 0.9, 0.2, 1);
   position: fixed;
-  top: 1.2rem;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding: 0.9rem 1rem 0;
+  box-sizing: border-box;
 
-  width: calc(100% - 3rem);
-  max-width: 1200px;
-
-  padding: 0.75rem 1.25rem;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  justify-items: center;
 
   z-index: 10000;
 
-  background: rgba(20, 16, 24, 0.45);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.7s cubic-bezier(0.2, 0.9, 0.2, 1);
+  pointer-events: none;
+}
 
-  border-radius: 14px;
+.navigation.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
 
+.nav-panel {
+  width: min(100%, 1220px);
+  max-width: 100%;
+  padding: 0.7rem 1rem 0.85rem;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 224, 191, 0.09);
+  background:
+    linear-gradient(180deg, rgba(255, 245, 228, 0.04), rgba(255, 222, 183, 0.015)),
+    linear-gradient(180deg, rgba(110, 79, 48, 0.07), rgba(47, 33, 21, 0.035)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.007) 0px,
+      rgba(255, 255, 255, 0.007) 1px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0) 5px
+    ),
+    rgba(35, 25, 16, 0.055);
+  backdrop-filter: blur(15px) saturate(112%);
+  -webkit-backdrop-filter: blur(15px) saturate(112%);
   box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.35),
-    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    0 10px 22px rgba(20, 13, 8, 0.09),
+    inset 0 1px 0 rgba(255, 249, 239, 0.08);
+}
+
+.nav-panel::before,
+.nav-panel::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-top: 1px solid rgba(255, 221, 176, 0.12);
+  top: 9px;
+}
+
+.nav-panel::before {
+  left: 10px;
+  border-left: 1px solid rgba(255, 221, 176, 0.12);
+}
+
+.nav-panel::after {
+  right: 10px;
+  border-right: 1px solid rgba(255, 221, 176, 0.12);
+}
+
+.nav-panel-left,
+.nav-panel-right {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.nav-panel-right {
+  justify-items: end;
+  flex-shrink: 0;
+}
+
+.nav-debug-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.34rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 224, 177, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 245, 228, 0.035), rgba(255, 222, 183, 0.012)),
+    rgba(58, 41, 24, 0.07);
+  color: rgba(248, 236, 213, 0.9);
+  text-decoration: none;
+  font-family: "Panchang-Light";
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 246, 229, 0.045);
+  transition:
+    transform 150ms var(--ui-ease-premium),
+    background-color 150ms var(--ui-ease-premium),
+    border-color 150ms var(--ui-ease-premium),
+    box-shadow 180ms var(--ui-ease-premium),
+    color 140ms var(--ui-ease-premium);
+  white-space: nowrap;
+}
+
+.nav-debug-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 224, 177, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 245, 228, 0.045), rgba(255, 222, 183, 0.016)),
+    rgba(76, 54, 33, 0.09);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 229, 0.055),
+    0 8px 16px rgba(20, 13, 8, 0.07);
+}
+
+.nav-system-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.nav-system-label {
+  margin: 0;
+  font-family: "Panchang-Light";
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  font-style: italic;
+  color: rgba(246, 227, 195, 0.58);
+}
+
+.nav-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 220, 132, 0.18);
+  background: rgba(96, 74, 49, 0.07);
+  color: rgba(219, 247, 191, 0.86);
+  font-family: "Panchang-Light";
+  font-size: 0.55rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+.nav-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(178, 244, 121, 0.95);
+  box-shadow: 0 0 6px rgba(166, 241, 109, 0.16);
+  animation: none;
 }
 
 .nav-tagline {
+  margin: 0;
   font-family: "Panchang-Light";
   font-size: 0.85rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-style: italic;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: rgba(248, 228, 196, 0.76);
+  text-shadow: 0 1px 16px rgba(27, 17, 9, 0.2);
+  overflow-wrap: anywhere;
+}
 
-  color: rgba(200, 190, 225, 0.75);
+.nav-tab-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  row-gap: 0.28rem;
+  min-width: 0;
+}
+
+.nav-tab {
+  padding: 0.26rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 166, 0.07);
+  background: rgba(58, 41, 24, 0.04);
+  color: rgba(241, 226, 203, 0.7);
+  font-family: "Panchang-Light";
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  transition:
+    transform 150ms var(--ui-ease-premium),
+    background-color 150ms var(--ui-ease-premium),
+    border-color 150ms var(--ui-ease-premium),
+    box-shadow 180ms var(--ui-ease-premium),
+    color 140ms var(--ui-ease-premium);
+}
+
+.nav-tab.is-active {
+  color: rgba(248, 240, 225, 0.95);
+  border-color: rgba(255, 224, 177, 0.14);
+  background: rgba(76, 54, 33, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 229, 0.04);
+}
+
+.nav-tab:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 224, 177, 0.12);
+  background: rgba(76, 54, 33, 0.06);
+  box-shadow: 0 6px 14px rgba(20, 13, 8, 0.06);
+}
+
+.nav-tab.is-active:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 246, 229, 0.05),
+    0 8px 16px rgba(20, 13, 8, 0.07);
+}
+
+.nav-tab.is-muted {
+  opacity: 0.56;
 }
 
 .navigation img {
   width: 18px;
   height: 18px;
-  opacity: 0.7;
+  opacity: 0.78;
+  filter: sepia(1) saturate(0.7) hue-rotate(-16deg) brightness(1.06)
+    contrast(0.92);
 
   transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+    opacity 150ms var(--ui-ease-premium),
+    transform 160ms var(--ui-ease-premium),
+    filter 180ms var(--ui-ease-premium);
 }
 
 .navigation a:hover img {
   opacity: 1;
-  transform: translateY(-1px);
+  transform: translateY(-1px) scale(1.02);
+  filter: sepia(1) saturate(1) hue-rotate(-18deg) brightness(1.14)
+    drop-shadow(0 0 8px rgba(245, 178, 92, 0.12));
 }
 
 .navLinks {
   display: flex;
   gap: 1.25rem;
   align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 100%;
+}
+
+.nav-mini-caption {
+  margin: 0;
+  font-family: "Panchang-Light";
+  font-style: italic;
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: rgba(244, 226, 196, 0.55);
+}
+
+@media (max-width: 900px) {
+  .navigation {
+    padding: 0.75rem 0.75rem 0;
+  }
+
+  .nav-panel {
+    align-items: start;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+    padding: 0.65rem 0.85rem 0.8rem;
+  }
+
+  .nav-panel-left {
+    width: 100%;
+  }
+
+.nav-panel-right {
+  width: 100%;
+  justify-items: start;
+}
+
+  .nav-debug-link {
+    justify-self: start;
+  }
+
+  .navLinks {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+
+  .nav-tagline {
+    font-size: 0.72rem;
+  }
 }
 
 @media (max-width: 600px) {
   .nav-tagline {
-    font-size: 0.7rem;
+    font-size: 0.62rem;
   }
 
   .navigation {
-    top: 0.75rem;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 0.5rem 0;
+  }
+
+  .nav-panel {
+    padding: 0.65rem 0.8rem 0.8rem;
+    border-radius: 14px;
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .nav-panel-right {
+    width: 100%;
+    justify-items: start;
+  }
+
+  .nav-debug-link {
+    justify-self: start;
+    font-size: 0.52rem;
+    padding: 0.32rem 0.62rem;
+  }
+
+  .navLinks {
+    gap: 1rem;
+  }
+
+  .nav-tab-row {
+    gap: 0.3rem;
+  }
+
+  .nav-tab {
+    font-size: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation {
+    transition: none;
+    transform: none;
+  }
+
+  .nav-status-dot {
+    animation: none;
+  }
+}
+
+@keyframes navStatusPulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
   }
 }

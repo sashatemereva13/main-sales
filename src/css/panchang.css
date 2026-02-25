@@ -20,7 +20,8 @@
 
 @font-face {
   font-family: "Panchang-Light";
-  src: url("/fonts/Panchang-Light.woff2") format("woff2"),
+  src:
+    url("/fonts/Panchang-Light.woff2") format("woff2"),
     url("/fonts/Panchang-Light.woff") format("woff"),
     url("/fonts/Panchang-Light.ttf") format("truetype");
   font-weight: 300;
@@ -30,10 +31,19 @@
 
 @font-face {
   font-family: "Panchang-Medium";
-  src: url("/fonts/Panchang-Medium.woff2") format("woff2"),
+  src:
+    url("/fonts/Panchang-Medium.woff2") format("woff2"),
     url("/fonts/Panchang-Medium.woff") format("woff"),
     url("/fonts/Panchang-Medium.ttf") format("truetype");
   font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Canobis";
+  src: url("/fonts/Canobis.ttf") format("truetype");
+  font-weight: 400;
   font-display: swap;
   font-style: normal;
 }

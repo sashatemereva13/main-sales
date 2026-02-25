@@ -45,11 +45,11 @@ export function calculateTier(answers) {
   };
 
   Object.values(answers).forEach((value) => {
-    if (map[value]) score += map[value];
+    if (Object.hasOwn(map, value)) score += map[value];
   });
 
   // hard signals
-  if (answers.feature_3d) return "IMMERSIVE";
+  if (answers.features === "feature_3d") return "IMMERSIVE";
 
   if (score <= 4) return "ESSENCE";
   if (score <= 8) return "SIGNATURE";

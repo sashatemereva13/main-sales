@@ -117,3 +117,669 @@
     animation: none !important;
   }
 }
+
+/* =====================================================
+   🎬 LANDING INTRO SEQUENCE
+===================================================== */
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: auto;
+  overflow: hidden;
+}
+
+.intro-overlay.sequence-finished {
+  pointer-events: none;
+}
+
+.intro-fade-curtain {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 50% 38%,
+      rgba(40, 30, 22, 0.35),
+      rgba(10, 10, 14, 0.86) 58%,
+      rgba(5, 6, 8, 0.98) 100%
+    ),
+    linear-gradient(180deg, rgba(9, 8, 12, 1), rgba(16, 12, 10, 1));
+  animation: introCurtainReveal 2.1s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+}
+
+.intro-overlay.camera-finished .intro-fade-curtain {
+  opacity: 0;
+}
+
+.intro-welcome-panel {
+  position: absolute;
+
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding: 0;
+  gap: 1rem;
+  opacity: 0;
+  transition: opacity 0.55s ease;
+}
+
+.intro-welcome-panel::before,
+.intro-welcome-panel::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  filter: blur(18px);
+}
+
+.intro-welcome-panel::before {
+  width: min(46vw, 540px);
+  height: min(46vw, 540px);
+  left: 50%;
+  top: 44%;
+  transform: translate(-68%, -56%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 214, 150, 0.2) 0%,
+    rgba(240, 176, 95, 0.13) 34%,
+    rgba(148, 93, 46, 0.06) 58%,
+    rgba(148, 93, 46, 0) 78%
+  );
+}
+
+.intro-welcome-panel::after {
+  width: min(58vw, 680px);
+  height: min(34vw, 420px);
+  left: 50%;
+  top: 52%;
+  transform: translate(-32%, -40%);
+  background: radial-gradient(
+    ellipse,
+    rgba(196, 235, 193, 0.1) 0%,
+    rgba(110, 175, 121, 0.08) 42%,
+    rgba(69, 111, 79, 0.03) 66%,
+    rgba(69, 111, 79, 0) 84%
+  );
+}
+
+.intro-welcome-panel.is-visible {
+  opacity: 1;
+}
+
+.intro-welcome-card {
+  position: relative;
+  width: 70%;
+  max-width: 960px;
+  padding: 1rem 1.1rem 1.15rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 224, 191, 0.09);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 245, 228, 0.045),
+      rgba(255, 222, 183, 0.015)
+    ),
+    linear-gradient(180deg, rgba(112, 80, 49, 0.08), rgba(45, 32, 20, 0.04)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.008) 0px,
+      rgba(255, 255, 255, 0.008) 1px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0) 5px
+    ),
+    rgba(33, 24, 16, 0.055);
+  backdrop-filter: blur(15px) saturate(112%);
+  -webkit-backdrop-filter: blur(15px) saturate(112%);
+  box-shadow:
+    0 10px 22px rgba(20, 13, 8, 0.09),
+    inset 0 1px 0 rgba(255, 249, 239, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0;
+  transform: translateY(calc(-100vh - 12rem));
+  transition: opacity 0.4s ease;
+}
+
+.intro-welcome-card::before,
+.intro-welcome-card::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 10px;
+  border-top: 1px solid rgba(255, 221, 176, 0.1);
+}
+
+.intro-welcome-card::before {
+  left: 10px;
+  border-left: 1px solid rgba(255, 221, 176, 0.1);
+}
+
+.intro-welcome-card::after {
+  right: 10px;
+  border-right: 1px solid rgba(255, 221, 176, 0.1);
+}
+
+.intro-welcome-panel.is-visible .intro-welcome-card {
+  opacity: 1;
+  transform: translateY(0);
+  animation: introWelcomeCardDrop 1.05s cubic-bezier(0.18, 0.95, 0.22, 1) both;
+}
+
+.intro-card-top {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.1rem;
+}
+
+.intro-card-top-left,
+.intro-card-top-right {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.intro-card-top-right {
+  justify-items: end;
+}
+
+.intro-card-system-label {
+  margin: 0;
+  color: rgba(246, 227, 195, 0.58);
+  font-family: "Panchang-Light", sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  font-style: italic;
+}
+
+.intro-card-tabs {
+  display: flex;
+  gap: 0.38rem;
+  flex-wrap: wrap;
+}
+
+.intro-card-tab {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 217, 166, 0.07);
+  background: rgba(52, 35, 20, 0.04);
+  color: rgba(241, 226, 203, 0.7);
+  font-family: "Panchang-Light", sans-serif;
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.intro-card-tab.is-active {
+  color: rgba(248, 240, 225, 0.95);
+  border-color: rgba(255, 224, 177, 0.14);
+  background: rgba(76, 54, 33, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 229, 0.04);
+}
+
+.intro-card-tab.is-muted {
+  opacity: 0.56;
+}
+
+.intro-card-coord {
+  margin: 0;
+  color: rgba(246, 230, 202, 0.64);
+  font-family: "Panchang-Light", sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  text-align: right;
+  font-style: italic;
+}
+
+.intro-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 220, 132, 0.18);
+  background: rgba(96, 74, 49, 0.07);
+  color: rgba(219, 247, 191, 0.86);
+  font-family: "Panchang-Light", sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+.intro-card-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(178, 244, 121, 0.95);
+  box-shadow: 0 0 6px rgba(166, 241, 109, 0.16);
+  animation: none;
+}
+
+.intro-welcome-panel.is-visible::before {
+  opacity: 1;
+  animation: introBloomDriftA 9s ease-in-out infinite alternate;
+}
+
+.intro-welcome-panel.is-visible::after {
+  opacity: 1;
+  animation: introBloomDriftB 11s ease-in-out infinite alternate;
+}
+
+.intro-welcome-text,
+.intro-welcome-subtext,
+.intro-cta-group {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.intro-welcome-panel.is-visible .intro-welcome-text {
+  animation: introItemReveal 0.7s ease-out 0.16s both;
+}
+
+.intro-welcome-panel.is-visible .intro-welcome-subtext {
+  animation: introItemReveal 0.7s ease-out 0.3s both;
+}
+
+.intro-welcome-panel.is-visible .intro-cta-group {
+  animation: introItemReveal 0.75s ease-out 0.44s both;
+}
+
+.intro-welcome-text {
+  margin: 0.2rem 0 0;
+  color: rgba(252, 245, 232, 0.96);
+  font-family: "Canobis";
+  font-size: clamp(2.4rem, 7vw, 5.25rem);
+
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  text-transform: none;
+  text-align: center;
+  text-shadow:
+    0 2px 24px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(240, 196, 145, 0.18);
+}
+
+.intro-welcome-subtext {
+  margin: -0.15rem 0 0.35rem;
+  max-width: 34rem;
+  color: rgba(247, 236, 214, 0.76);
+  font-family: "Panchang-Light", sans-serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(0.85rem, 1.35vw, 1rem);
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-shadow:
+    0 1px 14px rgba(0, 0, 0, 0.25),
+    0 0 24px rgba(236, 188, 132, 0.08);
+}
+
+.intro-start-button {
+  --ui-ease-premium: cubic-bezier(0.22, 0.9, 0.2, 1);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgba(255, 220, 172, 0.28);
+  border-radius: 999px;
+  padding: 0.8rem 1.15rem;
+  min-width: 152px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 245, 226, 0.055),
+      rgba(174, 134, 86, 0.02)
+    ),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.008) 0px,
+      rgba(255, 255, 255, 0.008) 1px,
+      rgba(0, 0, 0, 0) 2px,
+      rgba(0, 0, 0, 0) 6px
+    ),
+    rgba(53, 34, 18, 0.055);
+  color: rgba(255, 245, 227, 0.96);
+
+  font-family: "Panchang-Light", sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  cursor: pointer;
+
+  backdrop-filter: blur(14px) saturate(108%);
+  -webkit-backdrop-filter: blur(14px) saturate(108%);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 243, 224, 0.1),
+    0 12px 28px rgba(26, 17, 9, 0.22);
+
+  transition:
+    transform 160ms var(--ui-ease-premium),
+    box-shadow 180ms var(--ui-ease-premium),
+    border-color 150ms var(--ui-ease-premium),
+    background 160ms var(--ui-ease-premium);
+  animation: introButtonBreath 4.8s ease-in-out infinite;
+}
+
+.intro-start-button::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 223, 173, 0.22) 0%,
+    rgba(247, 184, 103, 0.12) 35%,
+    rgba(247, 184, 103, 0) 72%
+  );
+  opacity: 0.45;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.intro-start-button::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -38%;
+  width: 34%;
+  height: 140%;
+  transform: rotate(16deg) translateX(0);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 248, 232, 0.26) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-cta-group {
+  display: grid;
+  justify-items: center;
+  gap: 0.55rem;
+}
+
+.intro-cta-meta {
+  margin: 0;
+  color: rgba(246, 231, 204, 0.66);
+  font-family: "Panchang-Light", sans-serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+  text-transform: none;
+  text-align: center;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.18);
+}
+
+.intro-start-button:hover {
+  transform: translateY(-1px) scale(1.006);
+  border-color: rgba(255, 226, 179, 0.26);
+  background:
+    linear-gradient(180deg, rgba(255, 240, 216, 0.07), rgba(128, 88, 46, 0.03)),
+    rgba(60, 38, 20, 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 247, 231, 0.08),
+    0 10px 20px rgba(29, 18, 8, 0.12);
+}
+
+.intro-start-button:hover::after,
+.intro-start-button:focus-visible::after {
+  opacity: 1;
+  animation: introButtonSheen 0.9s ease-out 1;
+}
+
+.intro-start-button:focus-visible {
+  outline: none;
+  border-color: rgba(255, 236, 206, 0.55);
+  box-shadow:
+    0 0 0 3px rgba(245, 191, 113, 0.16),
+    0 10px 20px rgba(29, 18, 8, 0.12);
+}
+
+.quiz-intro-enter {
+  position: relative;
+  z-index: 3;
+  animation: quizReveal 0.9s ease-out both;
+  width: 100%;
+  height: 100dvh;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: calc(var(--quiz-nav-clearance-top) + env(safe-area-inset-top))
+    clamp(0.75rem, 2.8vw, 2rem)
+    calc(var(--quiz-nav-clearance-bottom) + env(safe-area-inset-bottom));
+}
+
+.quiz-stage {
+  --quiz-nav-clearance-top: clamp(5.75rem, 10vh, 7.35rem);
+  --quiz-nav-clearance-bottom: clamp(0.65rem, 2vh, 1.25rem);
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  display: grid;
+  align-content: stretch;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.quiz-stage > * {
+  pointer-events: auto;
+}
+
+@keyframes introCurtainReveal {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes quizReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes introItemReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes introWelcomeCardDrop {
+  0% {
+    transform: translateY(calc(-100vh - 12rem));
+  }
+  72% {
+    transform: translateY(10px);
+  }
+  88% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes introButtonGlow {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 243, 224, 0.08),
+      0 10px 22px rgba(26, 17, 9, 0.18),
+      0 0 0 rgba(247, 184, 103, 0);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 243, 224, 0.14),
+      0 14px 30px rgba(26, 17, 9, 0.22),
+      0 0 18px rgba(247, 184, 103, 0.12);
+  }
+}
+
+@keyframes introButtonBreath {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 243, 224, 0.06),
+      0 8px 16px rgba(26, 17, 9, 0.08),
+      0 0 0 rgba(247, 184, 103, 0);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 243, 224, 0.08),
+      0 10px 20px rgba(26, 17, 9, 0.1),
+      0 0 12px rgba(247, 184, 103, 0.06);
+  }
+}
+
+@keyframes introButtonSheen {
+  0% {
+    transform: rotate(16deg) translateX(0);
+  }
+  100% {
+    transform: rotate(16deg) translateX(360%);
+  }
+}
+
+@keyframes introBloomDriftA {
+  0% {
+    transform: translate(-68%, -56%) scale(0.96);
+    opacity: 0.72;
+  }
+  100% {
+    transform: translate(-61%, -52%) scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+@keyframes introBloomDriftB {
+  0% {
+    transform: translate(-32%, -40%) scale(0.98);
+    opacity: 0.58;
+  }
+  100% {
+    transform: translate(-38%, -46%) scale(1.06);
+    opacity: 0.84;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro-fade-curtain,
+  .quiz-intro-enter {
+    animation: none !important;
+  }
+
+  .intro-welcome-panel {
+    transition: none;
+  }
+
+  .intro-welcome-card {
+    transition: none;
+    transform: none;
+    opacity: 1;
+    animation: none !important;
+  }
+
+  .intro-card-status-dot {
+    animation: none;
+  }
+
+  .intro-welcome-text,
+  .intro-welcome-subtext,
+  .intro-cta-group {
+    opacity: 1;
+    transform: none;
+    animation: none !important;
+    filter: none;
+  }
+
+  .intro-welcome-panel::before,
+  .intro-welcome-panel::after {
+    animation: none !important;
+    transition: none;
+    opacity: 0.75;
+  }
+
+  .intro-start-button {
+    transition: none;
+    animation: none;
+  }
+
+  .intro-start-button::after {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .intro-welcome-panel {
+    padding: 6.2rem 0.65rem 0;
+  }
+
+  .intro-welcome-card {
+    padding: 0.8rem 0.8rem 0.95rem;
+    border-radius: 14px;
+    gap: 0.8rem;
+  }
+
+  .intro-card-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+
+  .intro-card-top-right {
+    justify-items: start;
+  }
+
+  .intro-card-coord {
+    text-align: left;
+  }
+
+  .intro-card-tabs {
+    gap: 0.28rem;
+  }
+
+  .intro-card-tab {
+    font-size: 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .quiz-stage {
+    --quiz-nav-clearance-top: clamp(5rem, 11vh, 6.5rem);
+    --quiz-nav-clearance-bottom: clamp(0.5rem, 1.5vh, 0.9rem);
+  }
+}
