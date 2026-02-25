@@ -32,6 +32,30 @@ export default defineConfig({
     rollupOptions: {
       plugins: [rollupNodePolyFill()],
       external: ["fsevents"], // <- ✅ Add this line here too
+      output: {
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+
+          if (
+            id.includes("/three") ||
+            id.includes("@react-three/fiber") ||
+            id.includes("@react-three/drei") ||
+            id.includes("three-stdlib")
+          ) {
+            return "vendor-three";
+          }
+
+          if (id.includes("/react/") || id.includes("/react-dom/")) {
+            return "vendor-react";
+          }
+
+          if (id.includes("framer-motion")) {
+            return "vendor-motion";
+          }
+
+          return "vendor-misc";
+        },
+      },
     },
   },
 });

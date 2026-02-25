@@ -1,4 +1,7 @@
-export default function SunLight() {
+export default function SunLight({
+  shadows = true,
+  shadowMapSize = 2048,
+}) {
   return (
     <>
       <ambientLight intensity={0.42} color="#ffe8d4" />
@@ -11,9 +14,9 @@ export default function SunLight() {
         position={[34, 12, 18]}
         intensity={1.02}
         color="#ffd1ad"
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        castShadow={shadows}
+        shadow-mapSize-width={shadowMapSize}
+        shadow-mapSize-height={shadowMapSize}
         shadow-camera-left={-72}
         shadow-camera-right={72}
         shadow-camera-top={72}

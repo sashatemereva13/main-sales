@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { getCopy } from "../i18n/copy";
 
 export default function QuizStep({
+  locale = "fr",
   step,
   textInput,
   setTextInput,
@@ -9,6 +11,7 @@ export default function QuizStep({
   onSelect,
   onTextSubmit,
 }) {
+  const copy = getCopy(locale);
   const [activeChoice, setActiveChoice] = useState(null);
   const selectTimerRef = useRef(null);
 
@@ -44,10 +47,10 @@ export default function QuizStep({
     const placeholder =
       step.placeholder ??
       (inputType === "email"
-        ? "votre@email.com"
+        ? copy.quizStep.emailPlaceholder
         : inputType === "url"
-          ? "https://..."
-          : "Ce que vous ressentez...");
+          ? copy.quizStep.urlPlaceholder
+          : copy.quizStep.textPlaceholder);
 
     return (
       <form
@@ -72,7 +75,7 @@ export default function QuizStep({
           />
 
           <div className="text-input-meta" id="quiz-text-meta">
-            <span className="text-input-hint">Entree pour continuer</span>
+            <span className="text-input-hint">{copy.quizStep.enterToContinue}</span>
             <span className="text-input-counter">
               {textInput.trim().length}/{maxLength}
             </span>
@@ -86,7 +89,7 @@ export default function QuizStep({
           className="next-button"
           disabled={!canSubmit}
         >
-          {isOptional && !textInput.trim() ? "passer →" : "continuer →"}
+          {isOptional && !textInput.trim() ? copy.quizStep.skip : copy.quizStep.continue}
         </button>
       </form>
     );

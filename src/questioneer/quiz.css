@@ -97,7 +97,8 @@
 ========================= */
 .quiz-section {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   overflow: hidden;
 }
 .quiz-background {
@@ -105,7 +106,8 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh; /* 👈 FIXED VISUAL SPACE */
+  height: 100svh;
+  height: 100dvh;
   pointer-events: none;
   overflow: hidden;
 }
@@ -1567,7 +1569,7 @@
     margin: 0;
     width: 100%;
     max-height: calc(100dvh - var(--quiz-viewport-offset));
-    padding: 0 0.35rem 1rem;
+    padding: 0 0.35rem calc(1rem + env(safe-area-inset-bottom));
     grid-template-columns:
       0.35rem
       minmax(0, 1fr)
@@ -1590,7 +1592,7 @@
     margin: 0 auto;
     align-self: start;
     max-height: calc(100dvh - var(--quiz-viewport-offset));
-    padding: 0.95rem 0.85rem 1.15rem;
+    padding: 0.95rem 0.85rem calc(1.15rem + env(safe-area-inset-bottom));
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -1765,6 +1767,84 @@
 
   .summary-delivery-card {
     padding: 0.95rem;
+  }
+}
+
+@media (max-width: 430px), (max-height: 740px) {
+  .quiz {
+    padding: 0 0.22rem calc(0.8rem + env(safe-area-inset-bottom));
+    grid-template-columns:
+      0.2rem
+      minmax(0, 1fr)
+      0.2rem;
+  }
+
+  .quiz-summary {
+    padding: 0.8rem 0.65rem calc(1rem + env(safe-area-inset-bottom));
+    border-radius: 14px;
+  }
+
+  .question-wrapper {
+    margin-bottom: 0.9rem;
+    padding: 0.75rem 0.75rem 0.65rem;
+  }
+
+  .quiz-prompt {
+    font-size: clamp(1.05rem, 4.7vw, 1.3rem);
+    line-height: 1.14;
+    max-width: 100%;
+  }
+
+  .quizChoice {
+    margin: 0.8rem 0 0.55rem;
+    padding: 0.22rem 0.08rem 0;
+    border-radius: 0.95rem;
+  }
+
+  .choice-overlay {
+    gap: 0.42rem;
+    max-height: min(260px, 34dvh);
+  }
+
+  .choice-card {
+    min-height: 60px;
+    padding: 0.56rem 0.52rem;
+    border-radius: 0.75rem;
+  }
+
+  .choice-text {
+    padding: 0.55rem 0.4rem;
+  }
+
+  .choice-label {
+    font-size: 0.68rem;
+    line-height: 1.16;
+    margin-bottom: 0.14rem;
+  }
+
+  .choice-caption {
+    font-size: 0.58rem;
+    line-height: 1.28;
+  }
+
+  .quiz-buttons,
+  .summary-actions {
+    gap: 0.45rem;
+  }
+
+  .summary-actions > * {
+    width: 100%;
+  }
+
+  .submit-button,
+  .summary-secondary-button {
+    min-height: 44px;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+  }
+
+  .answers-list {
+    max-height: min(170px, 22dvh);
   }
 }
 

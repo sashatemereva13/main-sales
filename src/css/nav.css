@@ -89,6 +89,52 @@
   flex-shrink: 0;
 }
 
+.nav-locale-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  padding: 0.14rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 224, 177, 0.1);
+  background: rgba(45, 31, 19, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 229, 0.04);
+}
+
+.nav-locale-btn {
+  border: 0;
+  background: transparent;
+  color: rgba(241, 226, 203, 0.72);
+  font-family: "Panchang-Light";
+  font-size: 0.52rem;
+  letter-spacing: 0.05em;
+  border-radius: 999px;
+  padding: 0.22rem 0.45rem;
+  cursor: pointer;
+  transition:
+    color 140ms var(--ui-ease-premium),
+    background-color 150ms var(--ui-ease-premium),
+    box-shadow 180ms var(--ui-ease-premium),
+    transform 150ms var(--ui-ease-premium);
+}
+
+.nav-locale-btn:hover {
+  color: rgba(248, 240, 225, 0.92);
+  background: rgba(76, 54, 33, 0.08);
+}
+
+.nav-locale-btn.is-active {
+  color: rgba(248, 240, 225, 0.96);
+  background: rgba(76, 54, 33, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 246, 229, 0.05);
+}
+
+.nav-locale-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(245, 191, 113, 0.16),
+    inset 0 1px 0 rgba(255, 246, 229, 0.05);
+}
+
 .nav-debug-link {
   display: inline-flex;
   align-items: center;
@@ -293,6 +339,10 @@
     justify-self: start;
   }
 
+  .nav-locale-switch {
+    justify-self: start;
+  }
+
   .navLinks {
     justify-content: flex-start;
     gap: 1rem;
@@ -328,6 +378,11 @@
     justify-self: start;
     font-size: 0.52rem;
     padding: 0.32rem 0.62rem;
+  }
+
+  .nav-locale-btn {
+    font-size: 0.5rem;
+    padding: 0.2rem 0.42rem;
   }
 
   .navLinks {

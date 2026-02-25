@@ -142,7 +142,7 @@ function inRoadClearing(x, z) {
   return false;
 }
 
-function createGrassClusterTexture(variant = 0) {
+function createGrassClusterTexture(variant = 0, anisotropy = 4) {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
   canvas.height = 256;
@@ -271,7 +271,7 @@ function createGrassClusterTexture(variant = 0) {
   tex.wrapT = THREE.ClampToEdgeWrapping;
   tex.minFilter = THREE.LinearMipMapLinearFilter;
   tex.magFilter = THREE.LinearFilter;
-  tex.anisotropy = 4;
+  tex.anisotropy = anisotropy;
   tex.needsUpdate = true;
   return tex;
 }
@@ -369,7 +369,19 @@ function populateGrassLayer({
   if (meshB.instanceColor) meshB.instanceColor.needsUpdate = true;
 }
 
-export default function GrassBlades({ count = 72000 }) {
+export default function GrassBlades({
+  count = 72000,
+  quality = "high",
+  paused = false,
+  hoverEnabled = true,
+}) {
+  const variantCount = quality === "low" ? 2 : TEX_VARIANTS;
+  const textureAnisotropy = quality === "low" ? 1 : quality === "mid" ? 2 : 4;
+  const baseSegments = quality === "low" ? 4 : quality === "mid" ? 5 : 7;
+  const fgSegments = quality === "low" ? 5 : quality === "mid" ? 7 : 9;
+  const hoverRadiusBase = quality === "low" ? 5.4 : 6.5;
+  const hoverRadiusFg = quality === "low" ? 6.2 : 7.4;
+  const frameDivider = quality === "low" ? 2 : 1;
   const FIELDS = [
     { centerX: 0, centerZ: 0, radius: 90 }, // main meadow
     { centerX: 0, centerZ: -40, radius: 35 }, // foreground patch
@@ -379,10 +391,17 @@ export default function GrassBlades({ count = 72000 }) {
   ];
 
   const baseVariantCounts = useMemo(
-    () => allocateCounts(count, [0.4, 0.34, 0.26]),
-    [count],
+    () =>
+      allocateCounts(
+        count,
+        variantCount === 2 ? [0.58, 0.42] : [0.4, 0.34, 0.26],
+      ),
+    [count, variantCount],
   );
-  const foregroundCount = Math.max(10000, Math.floor(count * 0.26));
+  const foregroundCount = Math.max(
+    quality === "low" ? 4500 : 10000,
+    Math.floor(count * (quality === "low" ? 0.18 : 0.26)),
+  );
 
   const baseMeshARefs = useRef([]);
   const baseMeshBRefs = useRef([]);
@@ -403,29 +422,30 @@ export default function GrassBlades({ count = 72000 }) {
     () => new THREE.Plane(new THREE.Vector3(0, 1, 0), 1.4),
     [],
   );
+  const frameCounterRef = useRef(0);
 
   const textures = useMemo(
     () =>
-      Array.from({ length: TEX_VARIANTS }, (_, i) =>
-        createGrassClusterTexture(i),
+      Array.from({ length: variantCount }, (_, i) =>
+        createGrassClusterTexture(i, textureAnisotropy),
       ),
-    [],
+    [variantCount, textureAnisotropy],
   );
 
   const geometryBase = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.9, 1.75, 1, 7);
+    const g = new THREE.PlaneGeometry(0.9, 1.75, 1, baseSegments);
     g.translate(0, 0.875, 0);
     return g;
-  }, []);
+  }, [baseSegments]);
 
   const geometryForeground = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1.15, 2.25, 1, 9);
+    const g = new THREE.PlaneGeometry(1.15, 2.25, 1, fgSegments);
     g.translate(0, 1.125, 0);
     return g;
-  }, []);
+  }, [fgSegments]);
 
   useEffect(() => {
-    for (let i = 0; i < TEX_VARIANTS; i++) {
+    for (let i = 0; i < variantCount; i++) {
       populateGrassLayer({
         meshA: baseMeshARefs.current[i],
         meshB: baseMeshBRefs.current[i],
@@ -475,6 +495,7 @@ export default function GrassBlades({ count = 72000 }) {
     POND_CLEARINGS,
     baseVariantCounts,
     foregroundCount,
+    variantCount,
     tempColor,
     dummyA,
     dummyB,
@@ -487,9 +508,18 @@ export default function GrassBlades({ count = 72000 }) {
   }, [textures]);
 
   useFrame((state) => {
-    state.raycaster.setFromCamera(state.pointer, state.camera);
-    const hasHit = state.raycaster.ray.intersectPlane(groundPlane, hitPoint);
-    hoverVec.lerp(hasHit ? hitPoint : farHover, hasHit ? 0.22 : 0.08);
+    if (paused) return;
+
+    frameCounterRef.current += 1;
+    if (frameDivider > 1 && frameCounterRef.current % frameDivider !== 0) return;
+
+    if (hoverEnabled) {
+      state.raycaster.setFromCamera(state.pointer, state.camera);
+      const hasHit = state.raycaster.ray.intersectPlane(groundPlane, hitPoint);
+      hoverVec.lerp(hasHit ? hitPoint : farHover, hasHit ? 0.22 : 0.08);
+    } else {
+      hoverVec.lerp(farHover, 0.25);
+    }
 
     const allMaterials = [
       ...baseMatARefs.current,
@@ -507,7 +537,7 @@ export default function GrassBlades({ count = 72000 }) {
 
   return (
     <>
-      {Array.from({ length: TEX_VARIANTS }).map((_, i) => (
+      {Array.from({ length: variantCount }).map((_, i) => (
         <group key={`grass-variant-${i}`}>
           <instancedMesh
             ref={(el) => {
@@ -525,7 +555,7 @@ export default function GrassBlades({ count = 72000 }) {
               uniforms={{
                 uTime: { value: 0 },
                 uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
-                uHoverRadius: { value: 6.5 },
+                uHoverRadius: { value: hoverRadiusBase },
                 uGrassTex: { value: textures[i] },
               }}
               vertexShader={VERTEX_SHADER}
@@ -552,7 +582,7 @@ export default function GrassBlades({ count = 72000 }) {
               uniforms={{
                 uTime: { value: 0 },
                 uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
-                uHoverRadius: { value: 6.5 },
+                uHoverRadius: { value: hoverRadiusBase },
                 uGrassTex: { value: textures[i] },
               }}
               vertexShader={VERTEX_SHADER}
@@ -577,8 +607,8 @@ export default function GrassBlades({ count = 72000 }) {
           uniforms={{
             uTime: { value: 0 },
             uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
-            uHoverRadius: { value: 7.4 },
-            uGrassTex: { value: textures[2] },
+            uHoverRadius: { value: hoverRadiusFg },
+            uGrassTex: { value: textures[Math.min(textures.length - 1, 2)] },
           }}
           vertexShader={VERTEX_SHADER}
           fragmentShader={FRAGMENT_SHADER}
@@ -600,8 +630,8 @@ export default function GrassBlades({ count = 72000 }) {
           uniforms={{
             uTime: { value: 0 },
             uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
-            uHoverRadius: { value: 7.4 },
-            uGrassTex: { value: textures[2] },
+            uHoverRadius: { value: hoverRadiusFg },
+            uGrassTex: { value: textures[Math.min(textures.length - 1, 2)] },
           }}
           vertexShader={VERTEX_SHADER}
           fragmentShader={FRAGMENT_SHADER}

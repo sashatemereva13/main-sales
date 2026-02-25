@@ -1,10 +1,14 @@
+import { getCopy } from "../i18n/copy";
+
 export default function QuizProgress({
+  locale = "fr",
   currentStepNumber,
   totalSteps,
   sectionLabel,
   currentQuestionNumber,
   totalQuestionCount,
 }) {
+  const copy = getCopy(locale);
   const progress = currentStepNumber / totalSteps;
   const questionProgress = currentQuestionNumber / Math.max(totalQuestionCount, 1);
   const percent = Math.round(questionProgress * 100);
@@ -26,7 +30,7 @@ export default function QuizProgress({
       <div className="progress-text">
         <div className="progress-row">
           <p className="progress-kicker">
-            Etape {currentStepNumber}/{totalSteps}
+            {copy.progress.step} {currentStepNumber}/{totalSteps}
           </p>
           <p className="progress-percent">{percent}%</p>
         </div>
@@ -34,13 +38,13 @@ export default function QuizProgress({
         <div className="progress-row progress-row-detail">
           <p className="progress-section">{sectionLabel}</p>
           <p className="progress-question">
-            Question {currentQuestionNumber}/{totalQuestionCount}
+            {copy.progress.question} {currentQuestionNumber}/{totalQuestionCount}
           </p>
         </div>
       </div>
 
       <div className="progress-route-shell">
-        <p className="progress-route-label">Strategy Path</p>
+        <p className="progress-route-label">{copy.progress.routeLabel}</p>
 
         <div className="progress-route" aria-hidden="true">
           <div className="progress-track">

@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./quiz.css";
 
-import steps from "./questions";
-import stepSections from "./steps";
+import { getQuestions } from "./questions";
+import { getStepSections } from "./steps";
 
 import { calculateTier } from "../utils/pricingTier";
 import { generateClientSummary } from "../utils/clientSummary";
+import { formatCopy, getCopy } from "../i18n/copy";
 
 import QuizProgress from "./QuizProgress";
 import QuizStep from "./QuizStep";
@@ -15,7 +16,7 @@ import QuizNavigation from "./QuizNavigation";
 // -------------------------
 // Helpers
 // -------------------------
-function getCurrentSection(stepIndex) {
+function getCurrentSection(stepIndex, stepSections) {
   return stepSections.find(
     (section) => stepIndex >= section.from && stepIndex <= section.to,
   );
@@ -50,9 +51,13 @@ function getCameraWaypoint(stepIndex, totalSteps, initialCameraTarget) {
 // Main Quiz
 // -------------------------
 export default function Quiz({
+  locale = "fr",
   setCameraTarget,
   initialCameraTarget = [0, 2.6, 26],
 }) {
+  const copy = getCopy(locale);
+  const steps = getQuestions(locale);
+  const stepSections = getStepSections(locale);
   const [answers, setAnswers] = useState({});
   const [stepIndex, setStepIndex] = useState(0);
   const [textInput, setTextInput] = useState("");
@@ -63,7 +68,7 @@ export default function Quiz({
   const [resultPhase, setResultPhase] = useState("idle");
 
   const step = steps[stepIndex];
-  const currentSection = getCurrentSection(stepIndex);
+  const currentSection = getCurrentSection(stepIndex, stepSections);
   const totalQuestionCount = steps.length;
   const currentQuestionNumber = Math.min(stepIndex + 1, totalQuestionCount);
 
@@ -162,7 +167,7 @@ export default function Quiz({
     }
 
     if (step.pattern && !step.pattern.test(trimmedValue)) {
-      setTextError("Veuillez entrer un format valide.");
+      setTextError(copy.quiz.validFormat);
       return;
     }
 
@@ -194,7 +199,7 @@ export default function Quiz({
     setSubmitting(true);
 
     const tier = calculateTier(answers);
-    const summary = generateClientSummary(answers, tier);
+    const summary = generateClientSummary(answers, tier, locale);
     const userContact = answers.email || answers.contact || "";
 
     try {
@@ -220,14 +225,12 @@ export default function Quiz({
         setSubmitted(true);
       } else {
         setSubmitError(
-          "Une erreur est survenue pendant l'envoi. Reessayez dans quelques instants.",
+          copy.quiz.submitErrorRetry,
         );
       }
     } catch (err) {
       console.error(err);
-      setSubmitError(
-        "Impossible d'envoyer votre recommandation pour le moment.",
-      );
+      setSubmitError(copy.quiz.submitErrorUnavailable);
     } finally {
       setSubmitting(false);
     }
@@ -248,13 +251,14 @@ export default function Quiz({
   // =========================
   if (stepIndex >= steps.length) {
     const tier = calculateTier(answers);
-    const summary = generateClientSummary(answers, tier);
+    const summary = generateClientSummary(answers, tier, locale);
     const answeredCount = steps.reduce((count, s, idx) => {
       const key = s.key ?? idx;
       return answers[key] ? count + 1 : count;
     }, 0);
-    const recipient = answers.email || answers.contact || "votre email";
-    const firstName = answers.name || "vous";
+    const recipient =
+      answers.email || answers.contact || copy.quiz.loadingRecipientFallback;
+    const firstName = answers.name || copy.quiz.firstNameFallback;
 
     if (resultPhase !== "ready") {
       return (
@@ -269,12 +273,9 @@ export default function Quiz({
             <span className="summary-loader-dot" />
             <span className="summary-loader-dot" />
           </div>
-          <p className="summary-loading-kicker">Preparation</p>
-          <h2 className="summary-title">J'assemble votre recommandation</h2>
-          <p className="client-summary">
-            Je relis vos reponses et je compose une proposition adaptee a votre
-            projet.
-          </p>
+          <p className="summary-loading-kicker">{copy.quiz.summaryLoadingKicker}</p>
+          <h2 className="summary-title">{copy.quiz.summaryLoadingTitle}</h2>
+          <p className="client-summary">{copy.quiz.summaryLoadingText}</p>
         </motion.div>
       );
     }
@@ -286,36 +287,36 @@ export default function Quiz({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <h2 className="summary-title">Voici ce que je vous proposerais</h2>
-        <p className="summary-lead">
-          Merci {firstName}. Votre parcours dans le studio est termine, voici
-          une direction claire pour la suite.
-        </p>
+        <h2 className="summary-title">{copy.quiz.summaryTitle}</h2>
+        <p className="summary-lead">{formatCopy(copy.quiz.summaryLead, { firstName })}</p>
 
-        <div className="summary-meta-row" aria-label="Resume du parcours">
-          <p className="summary-meta-pill">{answeredCount} reponses</p>
-          <p className="summary-meta-pill">{totalQuestionCount} questions</p>
-          <p className="summary-meta-pill">{stepSections.length} themes</p>
+        <div className="summary-meta-row" aria-label={copy.quiz.summaryAria}>
+          <p className="summary-meta-pill">
+            {formatCopy(copy.quiz.answersCount, { count: answeredCount })}
+          </p>
+          <p className="summary-meta-pill">
+            {formatCopy(copy.quiz.questionsCount, { count: totalQuestionCount })}
+          </p>
+          <p className="summary-meta-pill">
+            {formatCopy(copy.quiz.themesCount, { count: stepSections.length })}
+          </p>
         </div>
 
         <div className="tier-card">
-          <p className="tier-eyebrow">Recommandation</p>
+          <p className="tier-eyebrow">{copy.quiz.tierEyebrow}</p>
           <h3 className="tier-name">{tier}</h3>
         </div>
 
         <p className="client-summary">{summary}</p>
 
         <div className="summary-delivery-card">
-          <p className="summary-delivery-label">Envoi de votre recommandation</p>
+          <p className="summary-delivery-label">{copy.quiz.deliveryLabel}</p>
           <p className="summary-delivery-value">{recipient}</p>
-          <p className="summary-delivery-note">
-            Vous pourrez revenir en arriere pour ajuster une reponse avant
-            l'envoi.
-          </p>
+          <p className="summary-delivery-note">{copy.quiz.deliveryNote}</p>
         </div>
 
         <details className="answers-details">
-          <summary>Voir le détail de vos réponses</summary>
+          <summary>{copy.quiz.answersDetails}</summary>
 
           <ul className="answers-list">
             {steps.map((s, idx) => {
@@ -347,14 +348,13 @@ export default function Quiz({
 
         {submitting ? (
           <p className="submit-feedback pending" aria-live="polite">
-            Envoi en cours... je prepare votre recommandation.
+            {copy.quiz.submitPending}
           </p>
         ) : null}
 
         {submitted ? (
           <p className="thank-you" role="status" aria-live="polite">
-            Merci. Votre recommandation personnalisee sera envoyee tres bientot
-            a {recipient}.
+            {formatCopy(copy.quiz.thankYou, { recipient })}
           </p>
         ) : null}
 
@@ -365,7 +365,7 @@ export default function Quiz({
             className="summary-secondary-button"
             disabled={submitting}
           >
-            Modifier mes reponses
+            {copy.quiz.editAnswers}
           </button>
 
           {!submitted ? (
@@ -374,9 +374,7 @@ export default function Quiz({
               className="submit-button premium"
               disabled={submitting}
             >
-              {submitting
-                ? "Envoi en cours..."
-                : "Recevoir cette recommandation"}
+              {submitting ? copy.quiz.sendingButton : copy.quiz.receiveRecommendation}
             </button>
           ) : null}
         </div>
@@ -394,6 +392,7 @@ export default function Quiz({
       </div>
 
       <QuizProgress
+        locale={locale}
         currentStepNumber={currentStepNumber}
         totalSteps={totalSteps}
         sectionLabel={currentSection.label}
@@ -411,6 +410,7 @@ export default function Quiz({
           transition={{ duration: 0.42, ease: "easeOut" }}
         >
           <QuizStep
+            locale={locale}
             step={step}
             textInput={textInput}
             setTextInput={setTextInput}
@@ -420,6 +420,7 @@ export default function Quiz({
           />
 
           <QuizNavigation
+            locale={locale}
             canGoBack={stepIndex > 0}
             onBack={goBack}
             currentQuestionNumber={currentQuestionNumber}

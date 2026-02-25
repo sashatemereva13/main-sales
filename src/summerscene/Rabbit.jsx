@@ -12,7 +12,7 @@ const POND_ZONE = {
   radiusZ: 11.5,
 };
 
-export default function Rabbit({ position = [0, 0, 0] }) {
+export default function Rabbit({ position = [0, 0, 0], paused = false }) {
   const rootRef = useRef();
   const visualRef = useRef();
 
@@ -61,6 +61,7 @@ export default function Rabbit({ position = [0, 0, 0] }) {
 
   useFrame(({ clock }, delta) => {
     if (!rootRef.current || !visualRef.current) return;
+    if (paused) return;
 
     const base = basePos.current;
     const state = moveState.current;
