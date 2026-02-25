@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Build and Deploy Static Site
 
 on:
   push:
@@ -6,19 +6,30 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /var/www/main-sales
-            git pull origin main
-            rm -rf dist
-            npm ci
-            npm run build
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy via rsync
+        uses: burnett01/rsync-deployments@v6
+        with:
+          switches: -av --delete
+          path: dist/
+          remote_path: /var/www/main-sales/dist/
+          remote_host: ${{ secrets.SERVER_HOST }}
+          remote_user: ${{ secrets.SERVER_USER }}
+          remote_key: ${{ secrets.SERVER_SSH_KEY }}

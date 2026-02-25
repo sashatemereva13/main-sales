@@ -44,16 +44,7 @@ export default defineConfig({
           ) {
             return "vendor-three";
           }
-
-          if (id.includes("/react/") || id.includes("/react-dom/")) {
-            return "vendor-react";
-          }
-
-          if (id.includes("framer-motion")) {
-            return "vendor-motion";
-          }
-
-          return "vendor-misc";
+          return "vendor-app";
         },
       },
     },
