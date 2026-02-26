@@ -31,22 +31,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       plugins: [rollupNodePolyFill()],
-      external: ["fsevents"], // <- ✅ Add this line here too
-      output: {
-        manualChunks(id) {
-          if (!id.includes("node_modules")) return;
-
-          if (
-            id.includes("/three") ||
-            id.includes("@react-three/fiber") ||
-            id.includes("@react-three/drei") ||
-            id.includes("three-stdlib")
-          ) {
-            return "vendor-three";
-          }
-          return "vendor-app";
-        },
-      },
+      external: ["fsevents"],
     },
   },
 });
