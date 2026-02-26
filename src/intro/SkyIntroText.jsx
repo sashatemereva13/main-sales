@@ -47,11 +47,11 @@ const HOVER_GLASS_FILL = new THREE.Color("#f5fdff");
 const HOVER_GLASS_STROKE = new THREE.Color("#ffffff");
 const HOVER_GLASS_OUTLINE = new THREE.Color("#bfe9ff");
 const SHARED_GLASS_TEXT_PROPS = {
-  font: "/fonts/Canobis.ttf",
+  font: "/fonts/Panchang-Medium.ttf",
   textAlign: "center",
   anchorX: "center",
   anchorY: "middle",
-  color: "#5d2f1f",
+  color: "#f4c5b6",
   fillOpacity: 0.96,
   strokeWidth: "1.6%",
   strokeColor: "#5d2f1f",
@@ -100,9 +100,15 @@ function smoothstep(edge0, edge1, x) {
   return t * t * (3 - 2 * t);
 }
 
-function phraseEnvelope(progress, fadeInStart, visibleUntil, fadeSpan = SKY_INTRO_FADE_SPAN) {
+function phraseEnvelope(
+  progress,
+  fadeInStart,
+  visibleUntil,
+  fadeSpan = SKY_INTRO_FADE_SPAN,
+) {
   const fadeIn = smoothstep(fadeInStart, fadeInStart + fadeSpan, progress);
-  const fadeOut = 1 - smoothstep(visibleUntil, visibleUntil + fadeSpan, progress);
+  const fadeOut =
+    1 - smoothstep(visibleUntil, visibleUntil + fadeSpan, progress);
   return Math.pow(fadeIn * fadeOut, 0.82);
 }
 
@@ -221,7 +227,8 @@ function bindHoverHandlers(hoverRefLike) {
 
 function updateHoverStrengthValue(hoverState) {
   if (!hoverState) return 0;
-  hoverState.strength += ((hoverState.active ? 1 : 0) - hoverState.strength) * 0.1;
+  hoverState.strength +=
+    ((hoverState.active ? 1 : 0) - hoverState.strength) * 0.1;
   return hoverState.strength;
 }
 
@@ -307,7 +314,8 @@ export default function SkyIntroText({ duration = 17.2, locale = "en" }) {
       ? getParallaxScalars(camera.position)
       : { x: 0, y: 0, z: 0 };
     const hoverEffectsActive =
-      SKY_INTRO_FEATURES.hoverShimmer && hasAnyHoverActive(topHoverRef, lowerHoverRefs);
+      SKY_INTRO_FEATURES.hoverShimmer &&
+      hasAnyHoverActive(topHoverRef, lowerHoverRefs);
     if (rootRef.current) {
       rootRef.current.visible = progress < 1;
     }
