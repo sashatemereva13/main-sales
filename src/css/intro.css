@@ -126,7 +126,7 @@
   position: fixed;
   inset: 0;
   z-index: 40;
-  pointer-events: auto;
+  pointer-events: none;
   overflow: hidden;
 }
 
@@ -145,7 +145,7 @@
       rgba(5, 6, 8, 0.98) 100%
     ),
     linear-gradient(180deg, rgba(9, 8, 12, 1), rgba(16, 12, 10, 1));
-  animation: introCurtainReveal 2.1s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
+  animation: introCurtainReveal 3.6s cubic-bezier(0.2, 0.9, 0.2, 1) forwards;
 }
 
 .intro-overlay.camera-finished .intro-fade-curtain {
@@ -162,6 +162,7 @@
   padding: 0;
   gap: 1rem;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.55s ease;
 }
 
@@ -207,6 +208,7 @@
 
 .intro-welcome-panel.is-visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 .intro-welcome-card {
@@ -404,8 +406,14 @@
   line-height: 0.95;
   text-transform: none;
   text-align: center;
+  -webkit-text-stroke: 0.35px rgba(255, 235, 205, 0.14);
   text-shadow:
-    0 2px 24px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(96, 63, 38, 0.5),
+    0 2px 0 rgba(88, 58, 35, 0.42),
+    0 3px 0 rgba(76, 49, 29, 0.34),
+    0 4px 0 rgba(62, 39, 23, 0.26),
+    0 8px 18px rgba(0, 0, 0, 0.34),
+    0 16px 34px rgba(0, 0, 0, 0.22),
     0 0 40px rgba(240, 196, 145, 0.18);
 }
 
