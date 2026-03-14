@@ -7,10 +7,9 @@ import { getCopy } from "./i18n/copy";
 const Nav = ({
   reveal = true,
   activeTab = "scene",
-  exploreMode = false,
   locale = "fr",
   onLocaleChange,
-  onEnterExplore,
+  onBackToLanding,
   title,
   subtitle,
   showPrimaryCta = false,
@@ -63,6 +62,15 @@ const Nav = ({
 
         <div className="nav-panel-right">
           <div className="nav-controls-row">
+            {showQuizNav ? (
+              <button
+                type="button"
+                className="nav-secondary-button"
+                onClick={onBackToLanding}
+              >
+                {copy.quizNav.back}
+              </button>
+            ) : null}
             <div
               className="nav-locale-switch"
               role="group"
@@ -85,16 +93,6 @@ const Nav = ({
                 {copy.nav.localeEn}
               </button>
             </div>
-
-            {!exploreMode ? (
-              <button
-                type="button"
-                className="nav-debug-link"
-                onClick={onEnterExplore}
-              >
-                {copy.nav.exploreFields}
-              </button>
-            ) : null}
           </div>
 
           <div className="navLinks">

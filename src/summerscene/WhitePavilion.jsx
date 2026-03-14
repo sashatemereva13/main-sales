@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { sampleVisibleTerrainHeight } from "./terrainSurface";
 
@@ -62,14 +63,16 @@ function Planter({ position, scale = 1, material, flowerColor = "#ffd9e7" }) {
       <mesh material={material} castShadow receiveShadow>
         <cylinderGeometry args={[1.25, 0.78, 1.45, 28]} />
       </mesh>
-      <mesh position={[0, 0.92, 0]} castShadow receiveShadow>
-        <sphereGeometry args={[1.18, 18, 18]} />
-        <meshStandardMaterial color="#6d7d32" roughness={1} />
-      </mesh>
-      <mesh position={[0, 1.28, 0]} castShadow receiveShadow>
-        <sphereGeometry args={[0.72, 18, 18]} />
-        <meshStandardMaterial color={flowerColor} roughness={0.98} />
-      </mesh>
+      <group position={[0, 0.92, 0]}>
+        <mesh castShadow receiveShadow>
+          <sphereGeometry args={[1.18, 18, 18]} />
+          <meshStandardMaterial color="#6d7d32" roughness={1} />
+        </mesh>
+        <mesh position={[0, 0.36, 0]} castShadow receiveShadow>
+          <sphereGeometry args={[0.72, 18, 18]} />
+          <meshStandardMaterial color={flowerColor} roughness={0.98} />
+        </mesh>
+      </group>
     </group>
   );
 }
@@ -103,7 +106,7 @@ function Cascade({ position }) {
   );
 }
 
-function FlowerCrown({ material }) {
+function FlowerCrown({ material, vineRefs }) {
   const bunches = useMemo(
     () => [
       {
@@ -183,26 +186,35 @@ function FlowerCrown({ material }) {
       ))}
 
       {bunches.map((bunch, index) => (
-        <mesh
+        <group
           key={`vine-${index}`}
           position={[
             Math.cos(bunch.angle + 0.18) * 5.2,
-            11.2 - (index % 2) * 1.4,
+            14.3,
             Math.sin(bunch.angle + 0.18) * 5.2,
           ]}
-          rotation={[0, bunch.angle, 0.16]}
-          castShadow
-          receiveShadow
+          rotation={[0, bunch.angle, 0]}
+          ref={(node) => {
+            vineRefs.current[index] = node;
+          }}
         >
-          <capsuleGeometry args={[0.08, 6.4, 6, 10]} />
-          <meshStandardMaterial color="#7c8b3f" roughness={1} />
-        </mesh>
+          <mesh
+            position={[0, -3.3 - (index % 2) * 0.7, 0]}
+            rotation={[0.16, 0, 0]}
+            castShadow
+            receiveShadow
+          >
+            <capsuleGeometry args={[0.08, 6.4, 6, 10]} />
+            <meshStandardMaterial color="#7c8b3f" roughness={1} />
+          </mesh>
+        </group>
       ))}
     </>
   );
 }
 
 export default function WhitePavilion() {
+  const vineRefs = useRef([]);
   const stoneMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -224,6 +236,17 @@ export default function WhitePavilion() {
     ],
     [],
   );
+
+  useFrame((state) => {
+    const elapsed = state.clock.elapsedTime;
+
+    vineRefs.current.forEach((group, index) => {
+      if (!group) return;
+      const phase = elapsed * 0.88 + index * 0.72;
+      group.rotation.z = Math.sin(phase) * 0.06;
+      group.rotation.x = Math.cos(phase * 0.76) * 0.02;
+    });
+  });
 
   return (
     <group
@@ -351,7 +374,7 @@ export default function WhitePavilion() {
         flowerColor="#ffe5ec"
       />
 
-      <FlowerCrown material={stoneMaterial} />
+      <FlowerCrown material={stoneMaterial} vineRefs={vineRefs} />
     </group>
   );
 }

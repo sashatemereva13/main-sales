@@ -13,7 +13,6 @@ import ForestBackdrop from "./summerscene/ForestBackdrop";
 import MeadowRoad from "./summerscene/MeadowRoad";
 import WhitePavilion, {
   WHITE_PAVILION_LOOK_AT_POSITION,
-  WHITE_PAVILION_SWIRL_POSITION,
 } from "./summerscene/WhitePavilion";
 
 import Rabbit from "./summerscene/Rabbit";
@@ -108,7 +107,6 @@ function App() {
   const [cameraIntroDone, setCameraIntroDone] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [exploreMode, setExploreMode] = useState(false);
   const [introScrollProgress, setIntroScrollProgress] = useState(0);
   const [introCameraDebug, setIntroCameraDebug] = useState(null);
   const [hasTriggeredIntroHintNudge, setHasTriggeredIntroHintNudge] =
@@ -126,7 +124,7 @@ function App() {
   const introOrbitTurns = 1;
   const introOrbitStart = 0;
   const introOrbitUntil = 0.82;
-  const orbitMode = debugOrbit || exploreMode;
+  const orbitMode = debugOrbit;
   const showIntroCta = (cameraIntroDone || orbitMode) && !showQuiz;
   const introScrollEnabled = !orbitMode && !cameraIntroDone && !showQuiz;
   const showSceneStage = !showQuiz;
@@ -135,20 +133,14 @@ function App() {
     if (!cameraIntroDone) {
       setCameraIntroDone(true);
     }
-    setExploreMode(false);
     setShowWelcome(false);
     setShowQuiz(true);
   };
-  const handleEnterExplore = () => {
+  const handleBackToLanding = () => {
+    setShowQuiz(false);
+    setShowWelcome(true);
     setCameraIntroDone(true);
-    setShowWelcome(false);
-    setExploreMode(true);
-  };
-  const handleExitExplore = () => {
-    setExploreMode(false);
-    if (!showQuiz) {
-      setShowWelcome(true);
-    }
+    setCameraTarget(landingCameraTarget);
   };
   const handleIntroHintInteraction = () => {
     if (hasTriggeredIntroHintNudge || !introScrollEnabled) return;
@@ -210,22 +202,19 @@ function App() {
       <Nav
         reveal={cameraIntroDone || orbitMode}
         activeTab={showQuiz ? "quiz" : "scene"}
-        exploreMode={exploreMode}
         locale={locale}
         onLocaleChange={setLocale}
-        onEnterExplore={handleEnterExplore}
+        onBackToLanding={handleBackToLanding}
         title={
-          showWelcome && !showQuiz && !exploreMode ? "amber composition" : null
+          showWelcome && !showQuiz ? "amber composition" : null
         }
         subtitle={
-          showWelcome && !showQuiz && !exploreMode ? copy.intro.subtitle : null
+          showWelcome && !showQuiz ? copy.intro.subtitle : null
         }
-        showPrimaryCta={showIntroCta && showWelcome && !exploreMode}
+        showPrimaryCta={showIntroCta && showWelcome}
         primaryCtaLabel={copy.intro.startQuiz}
         onPrimaryCta={handleStartQuiz}
-        ctaMeta={
-          showWelcome && !showQuiz && !exploreMode ? copy.intro.ctaMeta : null
-        }
+        ctaMeta={showWelcome && !showQuiz ? copy.intro.ctaMeta : null}
       />
 
       {showSceneStage ? (
@@ -377,28 +366,6 @@ function App() {
               </div>
             ) : null}
           </div>
-          {exploreMode && !showQuiz ? (
-            <div
-              className="explore-controls"
-              role="group"
-              aria-label="Explore controls"
-            >
-              <button
-                type="button"
-                className="explore-control-button is-primary"
-                onClick={handleStartQuiz}
-              >
-                {copy.intro.startQuiz}
-              </button>
-              <button
-                type="button"
-                className="explore-control-button"
-                onClick={handleExitExplore}
-              >
-                {copy.intro.backToWelcome}
-              </button>
-            </div>
-          ) : null}
           {introScrollEnabled ? (
             <div
               ref={introScrollRef}

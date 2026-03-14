@@ -84,9 +84,13 @@ const VERTEX_SHADER = `
     );
 
     float windPhase = baseWorld.x * 0.35 + baseWorld.z * 0.29;
-    float windA = sin(windPhase + uTime * 1.25);
-    float windB = sin(windPhase * 1.9 + uTime * 0.9);
-    float wind = (windA * 0.65 + windB * 0.35) * (0.05 + vPatchMix * 0.08);
+    float windA = sin(windPhase + uTime * 1.45);
+    float windB = sin(windPhase * 1.9 + uTime * 1.02);
+    float windC = sin(baseWorld.x * 0.11 - baseWorld.z * 0.06 + uTime * 0.62);
+    float gust = smoothstep(0.15, 0.95, sin(uTime * 0.18 + baseWorld.x * 0.012));
+    float wind =
+      (windA * 0.52 + windB * 0.28 + windC * 0.2) *
+      (0.09 + vPatchMix * 0.14 + gust * 0.08);
 
     vec2 hoverDelta = baseWorld.xz - uHover.xz;
     float hoverDist = length(hoverDelta);
@@ -96,7 +100,8 @@ const VERTEX_SHADER = `
 
     float tipMask = pow(clamp(uv.y, 0.0, 1.0), 1.35);
     pos.x += (wind + hoverDir.x * hoverPush) * tipMask;
-    pos.z += (wind * 0.18 + hoverDir.y * hoverPush * 0.45) * tipMask;
+    pos.z += (wind * 0.34 + hoverDir.y * hoverPush * 0.45) * tipMask;
+    pos.y += abs(wind) * tipMask * 0.08;
 
     gl_Position =
       projectionMatrix *
