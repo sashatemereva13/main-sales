@@ -4,16 +4,16 @@ export default function SunLight({
 }) {
   return (
     <>
-      <ambientLight intensity={0.42} color="#ffe8d4" />
+      <ambientLight intensity={0.34} color="#ffe3c1" />
       <hemisphereLight
-        intensity={2.55}
-        color="#ffd7cc"
-        groundColor="#88b36d"
+        intensity={2.05}
+        color="#ffd8bf"
+        groundColor="#63744d"
       />
       <directionalLight
-        position={[34, 12, 18]}
-        intensity={1.02}
-        color="#ffd1ad"
+        position={[30, 11, 14]}
+        intensity={1.04}
+        color="#ffc08c"
         castShadow={shadows}
         shadow-mapSize-width={shadowMapSize}
         shadow-mapSize-height={shadowMapSize}
@@ -29,9 +29,9 @@ export default function SunLight({
 
       {/* Warm low fill to soften contrast and unify the peach/rose grade. */}
       <directionalLight
-        position={[-24, 7, -42]}
-        intensity={0.22}
-        color="#ffc8bc"
+        position={[-26, 9, -40]}
+        intensity={0.2}
+        color="#ffc6a4"
       />
     </>
   );

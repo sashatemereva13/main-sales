@@ -2,9 +2,55 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { MEADOW_ROAD_PATH_XZ } from "./meadowRoadPath";
+import {
+  MEADOW_ISLAND_CENTER,
+  MEADOW_ISLAND_RADIUS,
+} from "./meadowIslandConfig";
+import { sampleMeadowSurfaceHeight } from "./terrainSurface";
 
 const GROUND_Y_OFFSET = -0.42;
 const TEX_VARIANTS = 3;
+const GRASS_COLOR_PRESETS = Object.freeze({
+  skyMonochrome: Object.freeze({
+    textureHueShift: -18,
+    textureSaturationBoost: -10,
+    textureLightnessBoost: 4,
+    fieldTint: "#8c7a5f",
+    fieldTintStrength: 0.38,
+    flowerTintProtection: 0.82,
+    hazeTint: "#efc7a6",
+    hazeStrength: 0.22,
+  }),
+  skyComplementary: Object.freeze({
+    textureHueShift: 6,
+    textureSaturationBoost: -4,
+    textureLightnessBoost: 2,
+    fieldTint: "#5d7f49",
+    fieldTintStrength: 0.4,
+    flowerTintProtection: 0.78,
+    hazeTint: "#d8c099",
+    hazeStrength: 0.18,
+  }),
+});
+
+const ACTIVE_GRASS_COLOR_PRESET = "skyComplementary";
+const GRASS_COLOR_CONTROLS =
+  GRASS_COLOR_PRESETS[ACTIVE_GRASS_COLOR_PRESET];
+
+function hexToShaderVec3(hex) {
+  const color = new THREE.Color(hex);
+  return `${color.r.toFixed(3)}, ${color.g.toFixed(3)}, ${color.b.toFixed(3)}`;
+}
+
+const FIELD_TINT_SHADER_VEC3 = hexToShaderVec3(GRASS_COLOR_CONTROLS.fieldTint);
+const HAZE_TINT_SHADER_VEC3 = hexToShaderVec3(GRASS_COLOR_CONTROLS.hazeTint);
+const GRASS_ISLAND_FIELDS = [
+  {
+    centerX: MEADOW_ISLAND_CENTER[0],
+    centerZ: MEADOW_ISLAND_CENTER[1],
+    radius: MEADOW_ISLAND_RADIUS,
+  },
+];
 const VERTEX_SHADER = `
   uniform float uTime;
   uniform vec3 uHover;
@@ -78,16 +124,23 @@ const FRAGMENT_SHADER = `
     color = mix(color * 0.93, color * 1.01, patchSun);
     color *= mix(0.93, 1.01, vLightMix);
 
-    // Slightly desaturate greens and add a warm global tint.
+    // Keep the field meadow-green, but preserve more of the flower tint.
     float luma = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(vec3(luma), color, 0.82);
-    color *= vec3(1.045, 0.995, 0.9);
+    float flowerMask = smoothstep(0.64, 0.9, color.r + color.b - color.g * 0.6);
+    color = mix(vec3(luma), color, 0.86);
+    color = mix(
+      color,
+      vec3(${FIELD_TINT_SHADER_VEC3}),
+      ${GRASS_COLOR_CONTROLS.fieldTintStrength.toFixed(2)} *
+        (1.0 - flowerMask * ${GRASS_COLOR_CONTROLS.flowerTintProtection.toFixed(2)})
+    );
+    color = mix(color, color * vec3(1.12, 0.94, 1.02), flowerMask * 0.26);
 
-    // Softer contrast and warmer haze in the distance.
+    // Softer contrast with a cleaner sky-lit distance.
     float distant = smoothstep(0.52, 1.0, vDepthMix);
-    vec3 hazeTint = vec3(0.93, 0.86, 0.73);
-    color = mix(color, mix(vec3(dot(color, vec3(0.333))), color, 0.62), distant * 0.5);
-    color = mix(color, hazeTint, distant * 0.2);
+    vec3 hazeTint = vec3(${HAZE_TINT_SHADER_VEC3});
+    color = mix(color, mix(vec3(dot(color, vec3(0.333))), color, 0.72), distant * 0.42);
+    color = mix(color, hazeTint, distant * ${GRASS_COLOR_CONTROLS.hazeStrength.toFixed(2)});
 
     color *= (0.78 + vUv.y * 0.28);
 
@@ -103,14 +156,6 @@ const FRAGMENT_SHADER = `
     gl_FragColor = vec4(color, tex.a * depthFade * foregroundAlphaSoft);
   }
 `;
-
-function sampleGroundHeight(x, z) {
-  const swellA = Math.sin(x * 0.016) * Math.cos(z * 0.014) * 0.78;
-  const swellB = Math.sin((x + z) * 0.009) * 0.56;
-  const swellC = Math.cos((x - z) * 0.007) * 0.42;
-  const micro = Math.sin(x * 0.07 + z * 0.045) * 0.07;
-  return swellA + swellB + swellC + micro - 0.22;
-}
 
 function distToSegmentSqXZ(px, pz, ax, az, bx, bz) {
   const abx = bx - ax;
@@ -152,41 +197,47 @@ function createGrassClusterTexture(variant = 0, anisotropy = 4) {
   const variantConfig = [
     {
       blades: 54,
-      hueBase: 98,
-      hueJitter: 14,
-      petals: 16,
-      densityAlpha: 0.24,
-      leafWidth: 4.8,
-      chunk: 26,
+      hueBase: 99,
+      hueJitter: 9,
+      petals: 76,
+      densityAlpha: 0.18,
+      leafWidth: 6.6,
+      chunk: 30,
     },
     {
       blades: 62,
-      hueBase: 106,
-      hueJitter: 10,
-      petals: 10,
-      densityAlpha: 0.18,
-      leafWidth: 5.4,
-      chunk: 22,
+      hueBase: 101,
+      hueJitter: 8,
+      petals: 64,
+      densityAlpha: 0.14,
+      leafWidth: 7.2,
+      chunk: 27,
     },
     {
       blades: 48,
-      hueBase: 92,
-      hueJitter: 18,
-      petals: 24,
-      densityAlpha: 0.28,
-      leafWidth: 5.8,
-      chunk: 30,
+      hueBase: 96,
+      hueJitter: 10,
+      petals: 92,
+      densityAlpha: 0.2,
+      leafWidth: 7.8,
+      chunk: 35,
     },
   ][variant % TEX_VARIANTS];
+  const hueShift = GRASS_COLOR_CONTROLS.textureHueShift;
+  const satBoost = GRASS_COLOR_CONTROLS.textureSaturationBoost;
+  const lightBoost = GRASS_COLOR_CONTROLS.textureLightnessBoost;
 
   for (let i = 0; i < 22 + variant * 4; i++) {
     const x = 12 + Math.random() * 232;
     const y = 154 + Math.random() * 88;
     const w = variantConfig.chunk * (0.7 + Math.random() * 0.9);
     const h = 18 + Math.random() * 34;
-    const hue = variantConfig.hueBase + Math.random() * variantConfig.hueJitter;
-    const sat = 44 + Math.random() * 12;
-    const light = 28 + Math.random() * 20;
+    const hue =
+      variantConfig.hueBase +
+      Math.random() * variantConfig.hueJitter +
+      hueShift;
+    const sat = 44 + Math.random() * 12 + satBoost;
+    const light = 18 + Math.random() * 11 + lightBoost;
     ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${0.24 + Math.random() * 0.16})`;
     ctx.beginPath();
     ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
@@ -200,9 +251,12 @@ function createGrassClusterTexture(variant = 0, anisotropy = 4) {
     const bend = (Math.random() - 0.5) * (22 + variant * 7);
     const width = 1.8 + Math.random() * variantConfig.leafWidth;
 
-    const hue = variantConfig.hueBase + Math.random() * variantConfig.hueJitter;
-    const sat = 46 + Math.random() * 13;
-    const light = 30 + Math.random() * 24;
+    const hue =
+      variantConfig.hueBase +
+      Math.random() * variantConfig.hueJitter +
+      hueShift;
+    const sat = 48 + Math.random() * 14 + satBoost;
+    const light = 20 + Math.random() * 12 + lightBoost;
     ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.94)`;
     ctx.lineWidth = width;
     ctx.lineCap = "round";
@@ -217,7 +271,7 @@ function createGrassClusterTexture(variant = 0, anisotropy = 4) {
     );
     ctx.stroke();
 
-    ctx.strokeStyle = `hsla(${hue - 4}, ${Math.max(45, sat - 12)}%, ${Math.min(70, light + 12)}%, 0.5)`;
+    ctx.strokeStyle = `hsla(${hue - 2}, ${Math.max(30, sat - 6)}%, ${Math.min(42, light + 6)}%, 0.52)`;
     ctx.lineWidth = width * 0.42;
     ctx.beginPath();
     ctx.moveTo(x - width * 0.15, baseY - h * 0.08);
@@ -235,9 +289,9 @@ function createGrassClusterTexture(variant = 0, anisotropy = 4) {
     const y = 182 + Math.random() * 62;
     const w = 18 + Math.random() * 42;
     const h = 14 + Math.random() * 30;
-    const hue = 88 + Math.random() * 26;
-    const sat = 40 + Math.random() * 12;
-    const light = 32 + Math.random() * 14;
+    const hue = 98 + Math.random() * 10 + hueShift;
+    const sat = 40 + Math.random() * 10 + satBoost;
+    const light = 17 + Math.random() * 8 + lightBoost;
     ctx.fillStyle = `hsla(${hue}, ${sat}%, ${light}%, ${variantConfig.densityAlpha})`;
     ctx.beginPath();
     ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
@@ -247,14 +301,15 @@ function createGrassClusterTexture(variant = 0, anisotropy = 4) {
   for (let i = 0; i < variantConfig.petals; i++) {
     const x = 16 + Math.random() * 224;
     const y = 88 + Math.random() * 154;
-    const petalW = 2.4 + Math.random() * 4.2;
-    const petalH = 1.2 + Math.random() * 2.4;
+    const petalW = 3.6 + Math.random() * 6.4;
+    const petalH = 1.8 + Math.random() * 3.2;
     const rot = Math.random() * Math.PI;
     const tint = Math.random();
 
-    if (tint < 0.48) ctx.fillStyle = "rgba(255,249,239,0.98)";
-    else if (tint < 0.84) ctx.fillStyle = "rgba(252,224,236,0.98)";
-    else ctx.fillStyle = "rgba(244,201,226,0.96)";
+    if (tint < 0.2) ctx.fillStyle = "rgba(255,244,248,1)";
+    else if (tint < 0.62) ctx.fillStyle = "rgba(255,193,220,1)";
+    else if (tint < 0.9) ctx.fillStyle = "rgba(244,142,190,0.98)";
+    else ctx.fillStyle = "rgba(255,185,103,0.98)";
 
     ctx.save();
     ctx.translate(x, y);
@@ -291,7 +346,7 @@ function populateGrassLayer({
   meshB,
   count,
   zRange,
-  xSpreadRange,
+  xRange,
   fields,
   clearings,
   size,
@@ -303,62 +358,59 @@ function populateGrassLayer({
   if (!meshA || !meshB || count <= 0) return;
 
   const [minZ, maxZ] = zRange;
+  const [minX, maxX] = xRange;
   let placed = 0;
-  const gridSize = 1.15; // tighter carpet for near-continuous coverage
+  const maxAttempts = count * 14;
 
-  for (let gx = -xSpreadRange[1]; gx < xSpreadRange[1]; gx += gridSize) {
-    for (let gz = zRange[0]; gz < zRange[1]; gz += gridSize) {
-      if (placed >= count) break;
+  for (let attempt = 0; attempt < maxAttempts && placed < count; attempt += 1) {
+    const x = THREE.MathUtils.lerp(minX, maxX, Math.random());
+    const z = THREE.MathUtils.lerp(minZ, maxZ, Math.random());
 
-      const x = gx + (Math.random() - 0.5) * gridSize * 0.6;
-      const z = gz + (Math.random() - 0.5) * gridSize * 0.6;
-
-      if (fields?.length) {
-        const insideAnyField = fields.some((field) => {
-          const dx = x - field.centerX;
-          const dz = z - field.centerZ;
-          return dx * dx + dz * dz <= field.radius * field.radius;
-        });
-        if (!insideAnyField) continue;
-      }
-
-      if (clearings?.length) {
-        const insideClearing = clearings.some((c) => {
-          const nx = (x - c.centerX) / c.radiusX;
-          const nz = (z - c.centerZ) / c.radiusZ;
-          return nx * nx + nz * nz <= 1;
-        });
-        if (insideClearing) continue;
-      }
-
-      if (inRoadClearing(x, z)) continue;
-
-      const terrainY = sampleGroundHeight(x, z) + GROUND_Y_OFFSET;
-
-      const height =
-        (size.hMin + Math.random() * size.hVar) * (0.95 + Math.random() * 0.1);
-      const width = (size.wMin + Math.random() * size.wVar) * 1.28;
-
-      const yaw = Math.random() * Math.PI;
-
-      dummyA.position.set(x, terrainY, z);
-      dummyA.rotation.set(0, yaw, 0);
-      dummyA.scale.set(width, height, 1);
-      dummyA.updateMatrix();
-      meshA.setMatrixAt(placed, dummyA.matrix);
-
-      dummyB.position.set(x, terrainY, z);
-      dummyB.rotation.set(0, yaw + Math.PI * 0.5, 0);
-      dummyB.scale.set(width, height, 1);
-      dummyB.updateMatrix();
-      meshB.setMatrixAt(placed, dummyB.matrix);
-
-      tempColor.setRGB(1, 1, 1);
-      meshA.setColorAt(placed, tempColor);
-      meshB.setColorAt(placed, tempColor);
-
-      placed++;
+    if (fields?.length) {
+      const insideAnyField = fields.some((field) => {
+        const dx = x - field.centerX;
+        const dz = z - field.centerZ;
+        return dx * dx + dz * dz <= field.radius * field.radius;
+      });
+      if (!insideAnyField) continue;
     }
+
+    if (clearings?.length) {
+      const insideClearing = clearings.some((c) => {
+        const nx = (x - c.centerX) / c.radiusX;
+        const nz = (z - c.centerZ) / c.radiusZ;
+        return nx * nx + nz * nz <= 1;
+      });
+      if (insideClearing) continue;
+    }
+
+    if (inRoadClearing(x, z)) continue;
+
+    const terrainY = sampleMeadowSurfaceHeight(x, z) + GROUND_Y_OFFSET;
+
+    const height =
+      (size.hMin + Math.random() * size.hVar) * (0.95 + Math.random() * 0.1);
+    const width = (size.wMin + Math.random() * size.wVar) * 1.28;
+
+    const yaw = Math.random() * Math.PI;
+
+    dummyA.position.set(x, terrainY, z);
+    dummyA.rotation.set(0, yaw, 0);
+    dummyA.scale.set(width, height, 1);
+    dummyA.updateMatrix();
+    meshA.setMatrixAt(placed, dummyA.matrix);
+
+    dummyB.position.set(x, terrainY, z);
+    dummyB.rotation.set(0, yaw + Math.PI * 0.5, 0);
+    dummyB.scale.set(width, height, 1);
+    dummyB.updateMatrix();
+    meshB.setMatrixAt(placed, dummyB.matrix);
+
+    tempColor.setRGB(1, 1, 1);
+    meshA.setColorAt(placed, tempColor);
+    meshB.setColorAt(placed, tempColor);
+
+    placed++;
   }
 
   meshA.count = placed;
@@ -370,7 +422,7 @@ function populateGrassLayer({
 }
 
 export default function GrassBlades({
-  count = 72000,
+  count = 7200,
   quality = "high",
   paused = false,
   hoverEnabled = true,
@@ -381,14 +433,7 @@ export default function GrassBlades({
   const fgSegments = quality === "low" ? 5 : quality === "mid" ? 7 : 9;
   const hoverRadiusBase = quality === "low" ? 5.4 : 6.5;
   const hoverRadiusFg = quality === "low" ? 6.2 : 7.4;
-  const frameDivider = quality === "low" ? 2 : 1;
-  const FIELDS = [
-    { centerX: 0, centerZ: 0, radius: 90 }, // main meadow
-    { centerX: 0, centerZ: -40, radius: 35 }, // foreground patch
-  ];
-  const POND_CLEARINGS = [
-    { centerX: 18, centerZ: -18, radiusX: 13.5, radiusZ: 9.5 },
-  ];
+  const frameDivider = quality === "low" ? 3 : quality === "mid" ? 2 : 2;
 
   const baseVariantCounts = useMemo(
     () =>
@@ -433,56 +478,65 @@ export default function GrassBlades({
   );
 
   const geometryBase = useMemo(() => {
-    const g = new THREE.PlaneGeometry(0.9, 1.75, 1, baseSegments);
-    g.translate(0, 0.875, 0);
+    const g = new THREE.PlaneGeometry(1.16, 2.15, 1, baseSegments);
+    g.translate(0, 1.075, 0);
     return g;
   }, [baseSegments]);
 
   const geometryForeground = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1.15, 2.25, 1, fgSegments);
-    g.translate(0, 1.125, 0);
+    const g = new THREE.PlaneGeometry(1.52, 2.95, 1, fgSegments);
+    g.translate(0, 1.475, 0);
     return g;
   }, [fgSegments]);
 
   useEffect(() => {
-    for (let i = 0; i < variantCount; i++) {
+    baseMeshARefs.current.forEach((meshA, i) => {
       populateGrassLayer({
-        meshA: baseMeshARefs.current[i],
+        meshA,
         meshB: baseMeshBRefs.current[i],
         count: baseVariantCounts[i],
-        zRange: [-205, 185],
-        xSpreadRange: [52, 108],
-        fields: FIELDS,
-        clearings: POND_CLEARINGS,
+        zRange: [
+          MEADOW_ISLAND_CENTER[1] - (MEADOW_ISLAND_RADIUS + 14),
+          MEADOW_ISLAND_CENTER[1] + (MEADOW_ISLAND_RADIUS + 14),
+        ],
+        xRange: [
+          MEADOW_ISLAND_CENTER[0] - (MEADOW_ISLAND_RADIUS + 14),
+          MEADOW_ISLAND_CENTER[0] + (MEADOW_ISLAND_RADIUS + 14),
+        ],
+        fields: GRASS_ISLAND_FIELDS,
         size: {
-          hMin: 0.72,
-          hVar: 0.9,
-          hDepth: 0.22,
-          wMin: 0.62,
-          wVar: 0.52,
-          tilt: 0.13,
+          hMin: 1.08,
+          hVar: 1.26,
+          hDepth: 0.15,
+          wMin: 0.92,
+          wVar: 0.74,
+          tilt: 0.14,
         },
         tempColor,
         dummyA,
         dummyB,
-        depthBias: 0.62,
       });
-    }
+    });
 
     populateGrassLayer({
       meshA: fgMeshARef.current,
       meshB: fgMeshBRef.current,
       count: foregroundCount,
-      zRange: [-100, 40],
-      xSpreadRange: [-100, 100],
-      fields: FIELDS,
-      clearings: POND_CLEARINGS,
+      zRange: [
+        MEADOW_ISLAND_CENTER[1] - (MEADOW_ISLAND_RADIUS - 10),
+        MEADOW_ISLAND_CENTER[1] + (MEADOW_ISLAND_RADIUS - 10),
+      ],
+      xRange: [
+        MEADOW_ISLAND_CENTER[0] - (MEADOW_ISLAND_RADIUS - 10),
+        MEADOW_ISLAND_CENTER[0] + (MEADOW_ISLAND_RADIUS - 10),
+      ],
+      fields: GRASS_ISLAND_FIELDS,
       size: {
-        hMin: 1.1,
-        hVar: 1.15,
+        hMin: 1.62,
+        hVar: 1.58,
         hDepth: 0.15,
-        wMin: 0.9,
-        wVar: 0.62,
+        wMin: 1.2,
+        wVar: 0.92,
         tilt: 0.17,
       },
       tempColor,
@@ -491,8 +545,6 @@ export default function GrassBlades({
       depthBias: 0.85,
     });
   }, [
-    FIELDS,
-    POND_CLEARINGS,
     baseVariantCounts,
     foregroundCount,
     variantCount,
@@ -511,7 +563,8 @@ export default function GrassBlades({
     if (paused) return;
 
     frameCounterRef.current += 1;
-    if (frameDivider > 1 && frameCounterRef.current % frameDivider !== 0) return;
+    if (frameDivider > 1 && frameCounterRef.current % frameDivider !== 0)
+      return;
 
     if (hoverEnabled) {
       state.raycaster.setFromCamera(state.pointer, state.camera);
@@ -544,8 +597,6 @@ export default function GrassBlades({
               baseMeshARefs.current[i] = el;
             }}
             args={[geometryBase, null, baseVariantCounts[i]]}
-            castShadow
-            receiveShadow
             frustumCulled={false}
           >
             <shaderMaterial
@@ -571,8 +622,6 @@ export default function GrassBlades({
               baseMeshBRefs.current[i] = el;
             }}
             args={[geometryBase, null, baseVariantCounts[i]]}
-            castShadow
-            receiveShadow
             frustumCulled={false}
           >
             <shaderMaterial
@@ -598,8 +647,6 @@ export default function GrassBlades({
       <instancedMesh
         ref={fgMeshARef}
         args={[geometryForeground, null, foregroundCount]}
-        castShadow
-        receiveShadow
         frustumCulled={false}
       >
         <shaderMaterial
@@ -621,8 +668,6 @@ export default function GrassBlades({
       <instancedMesh
         ref={fgMeshBRef}
         args={[geometryForeground, null, foregroundCount]}
-        castShadow
-        receiveShadow
         frustumCulled={false}
       >
         <shaderMaterial

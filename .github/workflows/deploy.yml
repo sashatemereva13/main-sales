@@ -1,9 +1,17 @@
 name: Build and Deploy Static Site
 
+# what triggers the workflow
 on:
   push:
     branches:
       - main
+
+  # workflow_dispatch:
+  #   inputs:
+  #     environment:
+  #       description: "Choose environment"
+  #       required: true
+  #       default: "staging"
 
 jobs:
   build-deploy:

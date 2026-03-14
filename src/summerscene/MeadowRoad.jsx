@@ -1,42 +1,10 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { MEADOW_ROAD_PATH_XZ } from "./meadowRoadPath";
-
-const GROUND_MESH_Y = 0.129;
-const FOREST_MESH_Y = 10.95;
-const FOREST_MESH_Z = -46;
-
-function sampleMeadowHeight(x, z) {
-  const swellA = Math.sin(x * 0.016) * Math.cos(z * 0.014) * 0.78;
-  const swellB = Math.sin((x + z) * 0.009) * 0.56;
-  const swellC = Math.cos((x - z) * 0.007) * 0.42;
-  const micro = Math.sin(x * 0.07 + z * 0.045) * 0.07;
-  return swellA + swellB + swellC + micro - 0.22 + GROUND_MESH_Y;
-}
-
-function sampleForestRidgeHeight(x, worldZ) {
-  const z = worldZ - FOREST_MESH_Z;
-  const backBand = Math.exp(-Math.pow((z + 92) / 58, 2));
-  const ridge =
-    backBand * (9.5 + Math.sin(x * 0.03) * 2.8 + Math.cos(x * 0.017) * 2.2);
-  const shoulder =
-    Math.exp(-Math.pow((z + 132) / 48, 2)) *
-    (6.2 + Math.sin(x * 0.02 + 1.4) * 1.8);
-  const taper = Math.exp(-Math.pow((z + 28) / 110, 2)) * 1.15;
-  return ridge + shoulder - taper + FOREST_MESH_Y;
-}
-
-function sampleTerrainHeight(x, z) {
-  const meadow = sampleMeadowHeight(x, z);
-  if (z > -55) return meadow;
-
-  const ridge = sampleForestRidgeHeight(x, z);
-  const blend = THREE.MathUtils.smoothstep(z, -55, -78);
-  return THREE.MathUtils.lerp(meadow, ridge, blend);
-}
+import { sampleVisibleTerrainHeight } from "./terrainSurface";
 
 function buildRoadGeometry({
-  width = 5.6,
+  width = 9.6,
   samples = 180,
   shoulderExpand = 1.42,
 } = {}) {
@@ -77,7 +45,7 @@ function buildRoadGeometry({
       const z = p.z + lateral.z * edgeOffsets[j];
 
       // Slightly lift the road so it reads over grass/ground without z-fighting.
-      const y = sampleTerrainHeight(x, z) + 0.03;
+      const y = sampleVisibleTerrainHeight(x, z) + 0.03;
 
       const idx = i * vertsPerRow + j;
       positions[idx * 3 + 0] = x;
@@ -123,10 +91,10 @@ export default function MeadowRoad() {
         depthWrite: false,
         side: THREE.DoubleSide,
         uniforms: {
-          uRoadColor: { value: new THREE.Color("#6e5338") },
-          uTrackColor: { value: new THREE.Color("#58412b") },
-          uDustColor: { value: new THREE.Color("#b79262") },
-          uShoulderColor: { value: new THREE.Color("#6f6a42") },
+          uRoadColor: { value: new THREE.Color("#38566e") },
+          uTrackColor: { value: new THREE.Color("#46a2c0") },
+          uDustColor: { value: new THREE.Color("#62b7b7") },
+          uShoulderColor: { value: new THREE.Color("#42496f") },
         },
         vertexShader: `
           varying vec2 vUv;
@@ -190,5 +158,12 @@ export default function MeadowRoad() {
     [],
   );
 
-  return <mesh geometry={geometry} material={material} renderOrder={1} />;
+  return (
+    <mesh
+      position={[0, 0.5, 0]}
+      geometry={geometry}
+      material={material}
+      renderOrder={1}
+    />
+  );
 }

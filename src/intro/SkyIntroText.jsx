@@ -3,49 +3,48 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
-export const SKY_INTRO_TOP_TEXT_POSITION = [0, 150, -20];
+export const SKY_INTRO_TOP_TEXT_POSITION = [0, 60, -34];
+export const SKY_INTRO_TOP_TEXT_SETTINGS = {
+  position: SKY_INTRO_TOP_TEXT_POSITION,
+  fontSize: 13.8,
+  maxWidth: 144,
+  curveRadius: 240,
+  lineHeight: 1.08,
+  facingRange: [0.74, 0.95],
+};
 export const SKY_INTRO_LOWER_PHRASES = [
   {
-    text: "to interactive web worlds,",
-    position: [14.13, 42.18, 10.33],
-    fontSize: 7,
+    text: "immersive websites",
+    position: [0, 31, 18],
+    fontSize: 4.8,
     phaseOffset: 0.35,
+    facingRange: [0.76, 0.965],
   },
   {
-    text: "we design and build websites",
-    position: [-13.12, 33.45, -31.26],
-    fontSize: 5,
+    text: "Discover your website strategy\nin 3 minutes",
+    position: [0, 22.5, -20],
+    fontSize: 2.55,
     phaseOffset: 0.8,
-  },
-  {
-    text: "that represent you online",
-    position: [18, 40, -56.06],
-    fontSize: 6,
-    phaseOffset: 1.25,
+    facingRange: [0.76, 0.965],
   },
 ];
 export const SKY_INTRO_COPY = {
   en: {
-    top: "for those who understand that perception is power",
+    top: "amber composition",
     lower: [
-      "not just a website,",
-      "but an immersive digital presence",
-      "designed to reflect your level",
+      "Premium digital direction\nfor experts and elevated brands",
+      "We turn brand philosophy\ninto bespoke web experience",
     ],
   },
   fr: {
-    top: "pour ceux qui comprennent que la perception est un pouvoir",
+    top: "amber composition",
     lower: [
-      "pas simplement un site,",
-      "mais une présence digitale immersive",
-      "pensée pour refléter votre niveau",
+      "Direction digitale premium\npour experts et marques haut de gamme",
+      "Nous transformons votre philosophie de marque\nen experience web sur mesure",
     ],
   },
 };
 const SKY_INTRO_TEXT_OPACITY_MULTIPLIER = 0.8;
-const HOVER_GLASS_FILL = new THREE.Color("#f5fdff");
-const HOVER_GLASS_STROKE = new THREE.Color("#ffffff");
-const HOVER_GLASS_OUTLINE = new THREE.Color("#bfe9ff");
 const SHARED_GLASS_TEXT_PROPS = {
   font: "/fonts/Panchang-Medium.ttf",
   textAlign: "center",
@@ -70,29 +69,20 @@ const SHARED_GLASS_TEXT_MATERIAL_PROPS = {
   "material-opacity": 0,
 };
 const SKY_INTRO_FEATURES = {
-  hoverShimmer: true,
-  parallax: true,
-  settle: true,
-  drift: true,
+  parallax: false,
+  settle: false,
+  drift: false,
 };
-const SKY_INTRO_FADE_SPAN = 0.05;
-const TOP_PHRASE_WINDOW = [0.03, 0.28];
+const SKY_INTRO_FADE_SPAN = 0.08;
+const TOP_PHRASE_WINDOW = [0.06, 0.38];
 const LOWER_PHRASE_WINDOWS = [
-  [0.34, 0.5],
-  [0.52, 0.68],
-  [0.7, 0.88],
+  [0.34, 0.72],
+  [0.68, 0.98],
 ];
+const ZERO_PARALLAX = Object.freeze({ x: 0, y: 0, z: 0 });
 
 function clamp01(value) {
   return Math.min(Math.max(value, 0), 1);
-}
-
-function createHoverState() {
-  return {
-    active: false,
-    point: new THREE.Vector3(),
-    strength: 0,
-  };
 }
 
 function smoothstep(edge0, edge1, x) {
@@ -120,9 +110,18 @@ function getParallaxScalars(cameraPosition) {
   };
 }
 
-function hasAnyHoverActive(topHoverRef, lowerHoverRefs) {
-  if (topHoverRef.current?.active) return true;
-  return lowerHoverRefs.current.some((s) => s?.active || s?.strength > 0.001);
+function getProgress(elapsed, duration, progressOverride) {
+  if (typeof progressOverride === "number") {
+    return clamp01(progressOverride);
+  }
+
+  return clamp01(elapsed / duration);
+}
+
+function getEnvelopeSet(progress, windows) {
+  return windows.map(([fadeInStart, visibleUntil]) =>
+    phraseEnvelope(progress, fadeInStart, visibleUntil),
+  );
 }
 
 function getFacingVisibility(
@@ -143,6 +142,115 @@ function getFacingVisibility(
     .normalize();
   const dot = cameraForwardRef.current.dot(phraseToCameraRef.current);
   return smoothstep(minDot, maxDot, dot);
+}
+
+function updateCameraBasis(camera, basisRefs) {
+  const { forwardRef, motionForwardRef, rightRef, upRef, worldUpRef } =
+    basisRefs;
+
+  camera.getWorldDirection(motionForwardRef.current);
+  rightRef.current
+    .crossVectors(motionForwardRef.current, worldUpRef.current)
+    .normalize();
+  upRef.current
+    .crossVectors(rightRef.current, motionForwardRef.current)
+    .normalize();
+  forwardRef.current.copy(motionForwardRef.current);
+}
+
+function getPhraseDrift(time, index, phrase) {
+  if (!SKY_INTRO_FEATURES.drift) {
+    return ZERO_PARALLAX;
+  }
+
+  return {
+    x:
+      Math.sin(time * (0.2 + index * 0.03) + phrase.phaseOffset) *
+      (0.85 + index * 0.25),
+    y: Math.sin(time * 0.32 + phrase.phaseOffset) * (0.45 + index * 0.1),
+    z:
+      Math.cos(time * (0.16 + index * 0.02) + phrase.phaseOffset * 1.7) *
+      (1.0 + index * 0.35),
+  };
+}
+
+function applyPhraseParallax(node, index, parallax, basisRefs) {
+  const { rightRef, upRef, motionForwardRef } = basisRefs;
+  const xParallax = 1.2 + index * 0.8;
+  const yParallax = 0.7 + index * 0.35;
+  const zParallax = 0.9 + index * 0.48;
+
+  node.position.addScaledVector(rightRef.current, -parallax.x * xParallax);
+  node.position.addScaledVector(upRef.current, -parallax.y * yParallax);
+  node.position.addScaledVector(
+    motionForwardRef.current,
+    -parallax.z * zParallax,
+  );
+}
+
+function applyTopPhraseState(node, camera, time, envelope, opacityMultiplier, refs) {
+  node.rotation.set(
+    0.8 + Math.cos(time * 0.09 + 0.5) * 0.01,
+    Math.sin(time * 0.07 + 0.2) * 0.02,
+    Math.sin(time * 0.12 + 0.35) * 0.012,
+  );
+
+  const topFacing = getFacingVisibility(
+    node,
+    camera,
+    refs.forwardRef,
+    refs.phraseWorldPosRef,
+    refs.phraseToCameraRef,
+    ...SKY_INTRO_TOP_TEXT_SETTINGS.facingRange,
+  );
+  const opacity = envelope * (0.72 + topFacing * 0.28) * opacityMultiplier;
+  const scale = 0.985 + opacity * 0.035;
+
+  node.scale.setScalar(scale);
+  setOpacity(node, opacity);
+}
+
+function applyLowerPhraseState({
+  node,
+  phrase,
+  index,
+  time,
+  camera,
+  envelope,
+  parallax,
+  refs,
+}) {
+  const drift = getPhraseDrift(time, index, phrase);
+
+  node.position.set(
+    phrase.position[0] + drift.x,
+    phrase.position[1] + drift.y,
+    phrase.position[2] + drift.z,
+  );
+  applyPhraseParallax(node, index, parallax, refs);
+  node.lookAt(camera.position);
+
+  const facing = getFacingVisibility(
+    node,
+    camera,
+    refs.forwardRef,
+    refs.phraseWorldPosRef,
+    refs.phraseToCameraRef,
+    ...(phrase.facingRange ?? [0.76, 0.965]),
+  );
+  const opacity =
+    (envelope ?? 0) * (0.68 + facing * 0.32) * SKY_INTRO_TEXT_OPACITY_MULTIPLIER;
+  const scale = 0.965 + opacity * 0.07;
+
+  if (SKY_INTRO_FEATURES.settle) {
+    const settleDistance = (1 - opacity) * (2.4 + index * 1.1);
+    node.position.addScaledVector(refs.motionForwardRef.current, settleDistance);
+  }
+
+  node.rotation.z += Math.sin(time * 0.17 + phrase.phaseOffset) * 0.022;
+  node.rotation.x += Math.cos(time * 0.11 + phrase.phaseOffset) * 0.009;
+  node.scale.setScalar(scale);
+  setOpacity(node, opacity);
 }
 
 function setOpacity(node, opacity) {
@@ -203,91 +311,28 @@ function setOpacity(node, opacity) {
   }
 }
 
-function updateHoverState(stateRef, active, point) {
-  if (!stateRef.current) return;
-  stateRef.current.active = active;
-  if (point) stateRef.current.point.copy(point);
-}
-
-function bindHoverHandlers(hoverRefLike) {
-  return {
-    onPointerOver: (e) => {
-      e.stopPropagation();
-      updateHoverState(hoverRefLike, true, e.point);
-    },
-    onPointerMove: (e) => {
-      e.stopPropagation();
-      updateHoverState(hoverRefLike, true, e.point);
-    },
-    onPointerOut: () => {
-      updateHoverState(hoverRefLike, false);
-    },
-  };
-}
-
-function updateHoverStrengthValue(hoverState) {
-  if (!hoverState) return 0;
-  hoverState.strength +=
-    ((hoverState.active ? 1 : 0) - hoverState.strength) * 0.1;
-  return hoverState.strength;
-}
-
-function applyHoverGlassColor(node, hoverStrength, time, phase = 0) {
-  if (!node) return;
-
-  if (!node.userData.__baseTextColors) {
-    node.userData.__baseTextColors = {
-      color: new THREE.Color(node.color ?? "#ffffff"),
-      strokeColor: new THREE.Color(node.strokeColor ?? "#ffffff"),
-      outlineColor: new THREE.Color(node.outlineColor ?? "#ffffff"),
-      fillColor: new THREE.Color(),
-      strokeColorTmp: new THREE.Color(),
-      outlineColorTmp: new THREE.Color(),
-    };
-  }
-
-  const base = node.userData.__baseTextColors;
-  const pulse = hoverStrength * (0.86 + Math.sin(time * 2.4 + phase) * 0.14);
-
-  node.color = base.fillColor
-    .copy(base.color)
-    .lerp(HOVER_GLASS_FILL, pulse * 0.55);
-  node.strokeColor = base.strokeColorTmp
-    .copy(base.strokeColor)
-    .lerp(HOVER_GLASS_STROKE, pulse * 0.7);
-  node.outlineColor = base.outlineColorTmp
-    .copy(base.outlineColor)
-    .lerp(HOVER_GLASS_OUTLINE, pulse * 0.8);
-}
-
-export default function SkyIntroText({ duration = 17.2, locale = "en" }) {
+export default function SkyIntroText({
+  duration = 17.2,
+  locale = "en",
+  progressOverride,
+}) {
   const startedAt = useRef(null);
   const topTextRef = useRef(null);
   const lowerTextRefs = useRef([]);
   const rootRef = useRef(null);
-  const topHoverRef = useRef(createHoverState());
-  const lowerHoverRefs = useRef(
-    SKY_INTRO_LOWER_PHRASES.map(() => createHoverState()),
-  );
-  const cameraForwardRef = useRef(new THREE.Vector3());
-  const cameraMotionForwardRef = useRef(new THREE.Vector3());
-  const cameraRightRef = useRef(new THREE.Vector3());
-  const cameraUpRef = useRef(new THREE.Vector3());
-  const worldUpRef = useRef(new THREE.Vector3(0, 1, 0));
-  const phraseWorldPosRef = useRef(new THREE.Vector3());
-  const phraseToCameraRef = useRef(new THREE.Vector3());
+  const vectorRefs = {
+    forwardRef: useRef(new THREE.Vector3()),
+    motionForwardRef: useRef(new THREE.Vector3()),
+    rightRef: useRef(new THREE.Vector3()),
+    upRef: useRef(new THREE.Vector3()),
+    worldUpRef: useRef(new THREE.Vector3(0, 1, 0)),
+    phraseWorldPosRef: useRef(new THREE.Vector3()),
+    phraseToCameraRef: useRef(new THREE.Vector3()),
+  };
   const lowerPhraseDefs = useMemo(() => SKY_INTRO_LOWER_PHRASES, []);
   const phraseCopy = useMemo(
     () => SKY_INTRO_COPY[locale] ?? SKY_INTRO_COPY.en,
     [locale],
-  );
-  const topHoverHandlers = useMemo(() => bindHoverHandlers(topHoverRef), []);
-  const lowerHoverHandlers = useMemo(
-    () =>
-      SKY_INTRO_LOWER_PHRASES.map((_, index) =>
-        bindHoverHandlers({ current: lowerHoverRefs.current[index] }),
-      ),
-    [],
   );
 
   useFrame(({ clock, camera }) => {
@@ -296,123 +341,47 @@ export default function SkyIntroText({ duration = 17.2, locale = "en" }) {
     }
 
     const elapsed = clock.elapsedTime - startedAt.current;
-    const progress = clamp01(elapsed / duration);
+    const progress = getProgress(elapsed, duration, progressOverride);
     const time = clock.elapsedTime;
     const topEnvelope = phraseEnvelope(progress, ...TOP_PHRASE_WINDOW);
-    const lowerEnvelopes = LOWER_PHRASE_WINDOWS.map((window) =>
-      phraseEnvelope(progress, window[0], window[1]),
-    );
-    camera.getWorldDirection(cameraMotionForwardRef.current);
-    cameraRightRef.current
-      .crossVectors(cameraMotionForwardRef.current, worldUpRef.current)
-      .normalize();
-    cameraUpRef.current
-      .crossVectors(cameraRightRef.current, cameraMotionForwardRef.current)
-      .normalize();
+    const lowerEnvelopes = getEnvelopeSet(progress, LOWER_PHRASE_WINDOWS);
+
+    updateCameraBasis(camera, vectorRefs);
 
     const parallax = SKY_INTRO_FEATURES.parallax
       ? getParallaxScalars(camera.position)
-      : { x: 0, y: 0, z: 0 };
-    const hoverEffectsActive =
-      SKY_INTRO_FEATURES.hoverShimmer &&
-      hasAnyHoverActive(topHoverRef, lowerHoverRefs);
+      : ZERO_PARALLAX;
+
     if (rootRef.current) {
       rootRef.current.visible = progress < 1;
     }
 
     if (topTextRef.current) {
-      // Keep the title anchored to a fixed sky "surface" orientation instead of billboarding.
-      topTextRef.current.rotation.set(
-        0.8 + Math.cos(time * 0.09 + 0.5) * 0.01,
-        0 + Math.sin(time * 0.07 + 0.2) * 0.02,
-        0 + Math.sin(time * 0.12 + 0.35) * 0.012,
-      );
-      const topFacing = getFacingVisibility(
+      // The title stays attached to the "sky plane" while the supporting lines billboard.
+      applyTopPhraseState(
         topTextRef.current,
         camera,
-        cameraForwardRef,
-        phraseWorldPosRef,
-        phraseToCameraRef,
-        0.74,
-        0.95,
+        time,
+        topEnvelope,
+        SKY_INTRO_TEXT_OPACITY_MULTIPLIER,
+        vectorRefs,
       );
-      const topOpacity =
-        topEnvelope * topFacing * SKY_INTRO_TEXT_OPACITY_MULTIPLIER;
-      const topHoverStrength = hoverEffectsActive
-        ? updateHoverStrengthValue(topHoverRef.current)
-        : 0;
-      const topScale = 0.985 + topOpacity * 0.035;
-      topTextRef.current.scale.setScalar(topScale);
-      setOpacity(topTextRef.current, topOpacity);
-      if (SKY_INTRO_FEATURES.hoverShimmer) {
-        applyHoverGlassColor(topTextRef.current, topHoverStrength, time, 0.2);
-      }
     }
 
     lowerTextRefs.current.forEach((node, index) => {
       if (!node) return;
-      const def = lowerPhraseDefs[index];
-      const driftX = SKY_INTRO_FEATURES.drift
-        ? Math.sin(time * (0.2 + index * 0.03) + def.phaseOffset) *
-          (0.85 + index * 0.25)
-        : 0;
-      const driftY = SKY_INTRO_FEATURES.drift
-        ? Math.sin(time * 0.32 + def.phaseOffset) * (0.45 + index * 0.1)
-        : 0;
-      const driftZ = SKY_INTRO_FEATURES.drift
-        ? Math.cos(time * (0.16 + index * 0.02) + def.phaseOffset * 1.7) *
-          (1.0 + index * 0.35)
-        : 0;
-      node.position.set(
-        def.position[0] + driftX,
-        def.position[1] + driftY,
-        def.position[2] + driftZ,
-      );
-      const parallaxAmp = 1.8 + index * 1.15;
-      node.position.addScaledVector(
-        cameraRightRef.current,
-        -parallax.x * parallaxAmp,
-      );
-      node.position.addScaledVector(
-        cameraUpRef.current,
-        -parallax.y * (0.9 + index * 0.45),
-      );
-      node.position.addScaledVector(
-        cameraMotionForwardRef.current,
-        -parallax.z * (1.2 + index * 0.65),
-      );
-      node.lookAt(camera.position);
-      const facing = getFacingVisibility(
+      const phrase = lowerPhraseDefs[index];
+
+      applyLowerPhraseState({
         node,
+        phrase,
+        index,
+        time,
         camera,
-        cameraForwardRef,
-        phraseWorldPosRef,
-        phraseToCameraRef,
-        0.76,
-        0.965,
-      );
-      const opacity =
-        (lowerEnvelopes[index] ?? 0) *
-        facing *
-        SKY_INTRO_TEXT_OPACITY_MULTIPLIER;
-      const hoverStrength = hoverEffectsActive
-        ? updateHoverStrengthValue(lowerHoverRefs.current[index])
-        : 0;
-      const scale = 0.965 + opacity * 0.07;
-      const settleDistance = SKY_INTRO_FEATURES.settle
-        ? (1 - opacity) * (2.4 + index * 1.1)
-        : 0;
-      node.position.addScaledVector(
-        cameraMotionForwardRef.current,
-        settleDistance,
-      );
-      node.rotation.z += Math.sin(time * 0.17 + def.phaseOffset) * 0.022;
-      node.rotation.x += Math.cos(time * 0.11 + def.phaseOffset) * 0.009;
-      node.scale.setScalar(scale);
-      setOpacity(node, opacity);
-      if (SKY_INTRO_FEATURES.hoverShimmer) {
-        applyHoverGlassColor(node, hoverStrength, time, def.phaseOffset);
-      }
+        envelope: lowerEnvelopes[index],
+        parallax,
+        refs: vectorRefs,
+      });
     });
   });
 
@@ -420,12 +389,11 @@ export default function SkyIntroText({ duration = 17.2, locale = "en" }) {
     <group ref={rootRef}>
       <Text
         ref={topTextRef}
-        {...topHoverHandlers}
-        position={SKY_INTRO_TOP_TEXT_POSITION}
-        fontSize={17.6}
-        maxWidth={200}
-        curveRadius={240}
-        lineHeight={1.08}
+        position={SKY_INTRO_TOP_TEXT_SETTINGS.position}
+        fontSize={SKY_INTRO_TOP_TEXT_SETTINGS.fontSize}
+        maxWidth={SKY_INTRO_TOP_TEXT_SETTINGS.maxWidth}
+        curveRadius={SKY_INTRO_TOP_TEXT_SETTINGS.curveRadius}
+        lineHeight={SKY_INTRO_TOP_TEXT_SETTINGS.lineHeight}
         {...SHARED_GLASS_TEXT_PROPS}
         {...SHARED_GLASS_TEXT_MATERIAL_PROPS}
       >
@@ -433,26 +401,20 @@ export default function SkyIntroText({ duration = 17.2, locale = "en" }) {
       </Text>
 
       {lowerPhraseDefs.map((phrase, index) => (
-        <group key={`lower-phrase-${index}`}>
-          {/*
-            Keeping pointer handlers generated per-item keeps JSX readable and avoids
-            repeated inline imperative code blocks.
-          */}
-          <Text
-            ref={(node) => {
-              lowerTextRefs.current[index] = node;
-            }}
-            {...lowerHoverHandlers[index]}
-            position={phrase.position}
-            fontSize={phrase.fontSize}
-            maxWidth={50}
-            lineHeight={1.1}
-            {...SHARED_GLASS_TEXT_PROPS}
-            {...SHARED_GLASS_TEXT_MATERIAL_PROPS}
-          >
-            {phraseCopy.lower[index] ?? phrase.text}
-          </Text>
-        </group>
+        <Text
+          key={`lower-phrase-${index}`}
+          ref={(node) => {
+            lowerTextRefs.current[index] = node;
+          }}
+          position={phrase.position}
+          fontSize={phrase.fontSize}
+          maxWidth={70}
+          lineHeight={1.1}
+          {...SHARED_GLASS_TEXT_PROPS}
+          {...SHARED_GLASS_TEXT_MATERIAL_PROPS}
+        >
+          {phraseCopy.lower[index] ?? phrase.text}
+        </Text>
       ))}
     </group>
   );

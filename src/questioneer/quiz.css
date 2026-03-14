@@ -47,18 +47,18 @@
   background:
     linear-gradient(
       180deg,
-      rgba(255, 245, 228, 0.1),
-      rgba(255, 222, 183, 0.05)
+      rgba(255, 245, 228, 0.04),
+      rgba(255, 222, 183, 0.015)
     ),
-    linear-gradient(180deg, rgba(110, 79, 48, 0.14), rgba(47, 33, 21, 0.1)),
+    linear-gradient(180deg, rgba(110, 79, 48, 0.07), rgba(47, 33, 21, 0.035)),
     repeating-linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.014) 0px,
-      rgba(255, 255, 255, 0.014) 1px,
+      rgba(255, 255, 255, 0.007) 0px,
+      rgba(255, 255, 255, 0.007) 1px,
       rgba(0, 0, 0, 0) 2px,
       rgba(0, 0, 0, 0) 5px
     ),
-    rgba(35, 25, 16, 0.28);
+    rgba(35, 25, 16, 0.055);
 
   backdrop-filter: blur(15px) saturate(112%);
   -webkit-backdrop-filter: blur(15px) saturate(112%);
@@ -923,21 +923,16 @@
 
 .quiz-summary {
   --quiz-summary-modal-gap: clamp(0.6rem, 1.8vh, 1.1rem);
-  width: min(92vw, 780px);
-  max-width: 780px;
+  width: min(94vw, 1240px);
+  max-width: 1240px;
   margin: var(--quiz-summary-modal-gap) auto;
   align-self: center;
   justify-self: center;
-  padding: clamp(1.1rem, 3vh, 2.2rem) 1.1rem clamp(1.4rem, 4vh, 3rem);
+  padding: clamp(1.1rem, 3vh, 2.2rem) 1.1rem
+    calc(clamp(1.4rem, 4vh, 3rem) + env(safe-area-inset-bottom));
   text-align: center;
-  max-height: calc(
-    100dvh - var(--quiz-viewport-offset) - (var(--quiz-summary-modal-gap) * 2)
-  );
   min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable both-edges;
+  overflow: visible;
   border-radius: 20px;
   border: 1px solid rgba(255, 224, 191, 0.18);
   background:
@@ -1361,15 +1356,13 @@
   }
 
   .quiz-summary {
-    width: var(--quiz-panel-width);
+    width: min(94vw, 1120px);
     margin: clamp(0.45rem, 1.35vh, 0.8rem) auto;
     align-self: center;
-    padding: 0.9rem 0.8rem 1rem;
+    padding: 0.9rem 0.8rem calc(1.1rem + env(safe-area-inset-bottom));
     border-radius: 16px;
-    max-width: none;
-    max-height: calc(100dvh - var(--quiz-viewport-offset) - 0.9rem);
-    overflow-y: auto;
-    overflow-x: hidden;
+    max-width: 1120px;
+    overflow: visible;
   }
 
   .summary-title {
@@ -1591,10 +1584,8 @@
     width: 100%;
     margin: 0 auto;
     align-self: start;
-    max-height: calc(100dvh - var(--quiz-viewport-offset));
     padding: 0.95rem 0.85rem calc(1.15rem + env(safe-area-inset-bottom));
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: visible;
   }
 
   .question-wrapper {

@@ -1,40 +1,83 @@
 import { useMemo } from "react";
 import * as THREE from "three";
+import {
+  MEADOW_ISLAND_CENTER,
+  MEADOW_ISLAND_RADIUS,
+} from "./meadowIslandConfig";
+import { sampleMeadowSurfaceHeight } from "./terrainSurface";
 
 export default function Ground() {
-  const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(460, 460, 160, 160);
+  const { topGeometry, undersideGeometry } = useMemo(() => {
+    const geo = new THREE.CircleGeometry(MEADOW_ISLAND_RADIUS, 96, 0, Math.PI * 2);
     geo.rotateX(-Math.PI / 2);
 
     const pos = geo.attributes.position;
     const colors = [];
     const color = new THREE.Color();
+    const baseGreen = new THREE.Color("#4c8f1f");
+    const lushGreen = new THREE.Color();
+    const flowerTint = new THREE.Color();
 
-    for (let i = 0; i < pos.count; i++) {
+    for (let i = 0; i < pos.count; i += 1) {
       const x = pos.getX(i);
       const z = pos.getZ(i);
+      const worldX = x + MEADOW_ISLAND_CENTER[0];
+      const worldZ = z + MEADOW_ISLAND_CENTER[1];
+      const radial = Math.sqrt(x * x + z * z);
 
-      // More pronounced rolling meadow with soft long swells.
-      const swellA = Math.sin(x * 0.016) * Math.cos(z * 0.014) * 0.78;
-      const swellB = Math.sin((x + z) * 0.009) * 0.56;
-      const swellC = Math.cos((x - z) * 0.007) * 0.42;
-      const micro = Math.sin(x * 0.07 + z * 0.045) * 0.07;
-      const y = swellA + swellB + swellC + micro - 0.22;
+      pos.setY(i, sampleMeadowSurfaceHeight(worldX, worldZ) + 0.04);
 
-      pos.setY(i, y);
-
-      const sunPatch =
-        0.5 +
-        0.22 * Math.sin(x * 0.013 - z * 0.008) +
-        0.2 * Math.cos(z * 0.017 + x * 0.006) +
-        0.08 * Math.sin((x + z) * 0.03);
-
-      const grassTint = THREE.MathUtils.clamp(sunPatch, 0, 1);
-      color.setRGB(
-        THREE.MathUtils.lerp(0.16, 0.3, grassTint),
-        THREE.MathUtils.lerp(0.3, 0.58, grassTint),
-        THREE.MathUtils.lerp(0.1, 0.17, grassTint),
+      const innerMask =
+        1 - THREE.MathUtils.smoothstep(0, MEADOW_ISLAND_RADIUS, radial);
+      const patchwork =
+        Math.sin(worldX * 0.038) * Math.cos(worldZ * 0.034) * 0.5 + 0.5;
+      const terraceBands =
+        Math.sin(worldZ * 0.11 + worldX * 0.03) * 0.5 + 0.5;
+      const contourLift = Math.exp(
+        -Math.pow(
+          (radial - (MEADOW_ISLAND_RADIUS * (0.24 + patchwork * 0.5))) / 12,
+          2,
+        ),
       );
+      const flowerRibbonA = Math.exp(
+        -Math.pow(
+          (Math.sin(worldX * 0.058) * 16 + worldZ * 0.36 + 12) / 3.6,
+          2,
+        ),
+      );
+      const flowerRibbonB = Math.exp(
+        -Math.pow(
+          (Math.cos(worldZ * 0.062) * 14 - worldX * 0.28 - 3) / 4.2,
+          2,
+        ),
+      );
+      const flowerRibbonC = Math.exp(
+        -Math.pow(
+          (Math.sin((worldX + worldZ) * 0.04) * 18 + worldZ * 0.22 - 24) / 4.6,
+          2,
+        ),
+      );
+      const blossomBands = Math.max(flowerRibbonA, flowerRibbonB, flowerRibbonC);
+
+      lushGreen.setRGB(
+        THREE.MathUtils.lerp(0.14, 0.22, patchwork),
+        THREE.MathUtils.lerp(0.34, 0.56, terraceBands),
+        THREE.MathUtils.lerp(0.05, 0.12, patchwork),
+      );
+
+      color.copy(baseGreen).lerp(lushGreen, 0.56 + innerMask * 0.22);
+      color.multiplyScalar(THREE.MathUtils.lerp(0.92, 1.08, contourLift));
+
+      if (blossomBands > 0.08) {
+        flowerTint.set(blossomBands > 0.52 ? "#f6afc8" : "#f4c7da");
+        color.lerp(
+          flowerTint,
+          THREE.MathUtils.clamp(blossomBands * 0.34, 0, 0.28),
+        );
+      }
+
+      const rimFade = THREE.MathUtils.smoothstep(MEADOW_ISLAND_RADIUS * 0.82, MEADOW_ISLAND_RADIUS, radial);
+      color.multiplyScalar(THREE.MathUtils.lerp(1.03, 0.95, rimFade));
 
       colors.push(color.r, color.g, color.b);
     }
@@ -43,24 +86,55 @@ export default function Ground() {
     pos.needsUpdate = true;
     geo.computeVertexNormals();
 
-    return geo;
+    const lowerShell = new THREE.SphereGeometry(
+      MEADOW_ISLAND_RADIUS * 0.99,
+      96,
+      48,
+      0,
+      Math.PI * 2,
+      Math.PI / 2,
+      Math.PI / 2,
+    );
+
+    return {
+      topGeometry: geo,
+      undersideGeometry: lowerShell,
+    };
   }, []);
 
   return (
-    <mesh
-      geometry={geometry}
-      position={[0, -0.12, -8]}
-      receiveShadow
-      frustumCulled={false}
-    >
-      <meshStandardMaterial
-        vertexColors
-        color="#4b9a35"
-        roughness={0.98}
-        metalness={0}
-        emissive="#bdf08f"
-        emissiveIntensity={0.11}
-      />
-    </mesh>
+    <group position={[MEADOW_ISLAND_CENTER[0], 0, MEADOW_ISLAND_CENTER[1]]}>
+      <mesh
+        geometry={topGeometry}
+        receiveShadow
+        frustumCulled={false}
+      >
+        <meshStandardMaterial
+          vertexColors
+          roughness={1}
+          metalness={0}
+          emissive="#2a2317"
+          emissiveIntensity={0.03}
+        />
+      </mesh>
+
+      <mesh
+        geometry={undersideGeometry}
+        position={[0, -1.6, 0]}
+        scale={[1, 0.74, 1]}
+        castShadow
+        receiveShadow
+        frustumCulled={false}
+      >
+        <meshStandardMaterial
+          color="#3f5d2a"
+          roughness={0.98}
+          metalness={0}
+          emissive="#1d170f"
+          emissiveIntensity={0.02}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
   );
 }

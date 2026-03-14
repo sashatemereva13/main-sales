@@ -15,7 +15,7 @@ export default function HeroTitle() {
       anchorY="middle"
       castShadow
     >
-      Sasha13Studio
+      aurel 13
     </Text>
   );
 }

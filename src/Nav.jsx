@@ -7,17 +7,12 @@ import { getCopy } from "./i18n/copy";
 const Nav = ({
   reveal = true,
   activeTab = "scene",
-  debugOrbit = false,
+  exploreMode = false,
   locale = "fr",
   onLocaleChange,
+  onEnterExplore,
 }) => {
   const copy = getCopy(locale);
-  const debugHref =
-    typeof window !== "undefined"
-      ? debugOrbit
-        ? window.location.pathname
-        : `${window.location.pathname}?debugCamera=1`
-      : "/?debugCamera=1";
 
   return (
     <nav className={`navigation ${reveal ? "is-revealed" : ""}`}>
@@ -25,6 +20,7 @@ const Nav = ({
         <div className="nav-panel-left">
           <div className="nav-system-row">
             <p className="nav-system-label">{copy.nav.studioHud}</p>
+            <span className="nav-system-line" aria-hidden="true" />
             <span className="nav-status-pill">
               <span className="nav-status-dot" />
               {copy.nav.meadowLive}
@@ -49,28 +45,40 @@ const Nav = ({
         </div>
 
         <div className="nav-panel-right">
-          <div className="nav-locale-switch" role="group" aria-label={copy.nav.localeLabel}>
-            <button
-              type="button"
-              className={`nav-locale-btn ${locale === "fr" ? "is-active" : ""}`}
-              onClick={() => onLocaleChange?.("fr")}
-              aria-pressed={locale === "fr"}
+          <div className="nav-controls-row">
+            <div
+              className="nav-locale-switch"
+              role="group"
+              aria-label={copy.nav.localeLabel}
             >
-              {copy.nav.localeFr}
-            </button>
-            <button
-              type="button"
-              className={`nav-locale-btn ${locale === "en" ? "is-active" : ""}`}
-              onClick={() => onLocaleChange?.("en")}
-              aria-pressed={locale === "en"}
-            >
-              {copy.nav.localeEn}
-            </button>
-          </div>
+              <button
+                type="button"
+                className={`nav-locale-btn ${locale === "fr" ? "is-active" : ""}`}
+                onClick={() => onLocaleChange?.("fr")}
+                aria-pressed={locale === "fr"}
+              >
+                {copy.nav.localeFr}
+              </button>
+              <button
+                type="button"
+                className={`nav-locale-btn ${locale === "en" ? "is-active" : ""}`}
+                onClick={() => onLocaleChange?.("en")}
+                aria-pressed={locale === "en"}
+              >
+                {copy.nav.localeEn}
+              </button>
+            </div>
 
-          <a className="nav-debug-link" href={debugHref}>
-            {debugOrbit ? copy.nav.exitDebug : copy.nav.enterDebug}
-          </a>
+            {!exploreMode ? (
+              <button
+                type="button"
+                className="nav-debug-link"
+                onClick={onEnterExplore}
+              >
+                {copy.nav.exploreFields}
+              </button>
+            ) : null}
+          </div>
 
           <div className="navLinks">
             <a
@@ -96,7 +104,10 @@ const Nav = ({
             </a>
           </div>
 
-          <p className="nav-mini-caption">{copy.nav.openChannels}</p>
+          <div className="nav-foot-row">
+            <span className="nav-foot-line" aria-hidden="true" />
+            <p className="nav-mini-caption">{copy.nav.openChannels}</p>
+          </div>
         </div>
       </div>
     </nav>

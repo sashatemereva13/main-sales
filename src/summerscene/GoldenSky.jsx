@@ -2,15 +2,44 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 
+function createSunTexture(size = 256, innerAlpha = 1, outerAlpha = 0) {
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  const gradient = ctx.createRadialGradient(
+    size * 0.5,
+    size * 0.5,
+    size * 0.08,
+    size * 0.5,
+    size * 0.5,
+    size * 0.5,
+  );
+
+  gradient.addColorStop(0, `rgba(255, 250, 236, ${innerAlpha})`);
+  gradient.addColorStop(0.28, "rgba(255, 222, 173, 0.92)");
+  gradient.addColorStop(0.58, "rgba(255, 178, 112, 0.48)");
+  gradient.addColorStop(1, `rgba(255, 149, 92, ${outerAlpha})`);
+
+  ctx.clearRect(0, 0, size, size);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.needsUpdate = true;
+  return texture;
+}
+
 export default function GoldenSky() {
   const material = useMemo(() => {
     return new THREE.ShaderMaterial({
       side: THREE.BackSide,
       uniforms: {
-        zenithColor: { value: new THREE.Color("#ed9f9e") },
-        midColor: { value: new THREE.Color("#e4c495") },
-        horizonColor: { value: new THREE.Color("#ffd8bd") },
-        hazeColor: { value: new THREE.Color("#d8c3ad") },
+        zenithColor: { value: new THREE.Color("#d7839d") },
+        midColor: { value: new THREE.Color("#f0ae83") },
+        horizonColor: { value: new THREE.Color("#ffd8a8") },
+        hazeColor: { value: new THREE.Color("#f3c29a") },
       },
       vertexShader: `
         varying vec3 vWorldPosition;
@@ -36,11 +65,11 @@ export default function GoldenSky() {
 
           // Very light atmospheric haze near the horizon.
           float hazeBand = 1.0 - smoothstep(-0.08, 0.2, h);
-          grad = mix(grad, hazeColor, hazeBand * 0.4);
+          grad = mix(grad, hazeColor, hazeBand * 0.52);
 
           // Soft bloom around the horizon line.
           float horizonGlow = exp(-pow((h - 0.015) * 7.4, 2.0));
-          grad += hazeColor * (horizonGlow * 0.14);
+          grad += hazeColor * (horizonGlow * 0.22);
 
           gl_FragColor = vec4(grad, 1.0);
         }
@@ -48,10 +77,38 @@ export default function GoldenSky() {
     });
   }, []);
 
+  const sunCoreTexture = useMemo(() => createSunTexture(256, 1, 0), []);
+  const sunGlowTexture = useMemo(() => createSunTexture(256, 0.8, 0), []);
+
   return (
-    <mesh>
-      <sphereGeometry args={[500, 64, 64]} />
-      <primitive object={material} attach="material" />
-    </mesh>
+    <group position={[0, 0, 0]}>
+      <mesh>
+        <sphereGeometry args={[500, 64, 64]} />
+        <primitive object={material} attach="material" />
+      </mesh>
+
+      {/* <sprite position={[145, 54, -250]} scale={[58, 58, 1]}>
+        <spriteMaterial
+          map={sunGlowTexture}
+          color="#ffb36e"
+          transparent
+          opacity={0.55}
+          depthWrite={false}
+          depthTest={false}
+          blending={THREE.AdditiveBlending}
+        />
+      </sprite> */}
+      {/* 
+      <sprite position={[145, 54, -248]} scale={[26, 26, 1]}>
+        <spriteMaterial
+          map={sunCoreTexture}
+          color="#fff3cf"
+          transparent
+          opacity={0.98}
+          depthWrite={false}
+          depthTest={false}
+        />
+      </sprite> */}
+    </group>
   );
 }

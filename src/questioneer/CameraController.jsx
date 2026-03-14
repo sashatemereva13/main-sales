@@ -1,5 +1,5 @@
 import { useThree, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { computeIntroCameraPose } from "../intro/introCameraMath";
 
@@ -7,11 +7,13 @@ export default function CameraController({
   target,
   introStart = [0, 24, 70],
   introDuration = 2.8,
+  introProgress,
   lookAt = [0, 1.5, 0],
   introLookAtStart = lookAt,
   introOrbitTurns = 0,
   introOrbitStart = 0,
   introOrbitUntil = 0.6,
+  skipIntro = false,
   onIntroFrame,
   onIntroComplete,
 }) {
@@ -25,6 +27,19 @@ export default function CameraController({
   const introDone = useRef(false);
   const introCompleteCalled = useRef(false);
   const lastDebugEmitAt = useRef(-Infinity);
+  const hasControlledProgress = typeof introProgress === "number";
+
+  useEffect(() => {
+    if (!skipIntro || introDone.current) return;
+
+    introDone.current = true;
+    introStartedAt.current = 0;
+    if (!introCompleteCalled.current) {
+      introCompleteCalled.current = true;
+      onIntroComplete?.();
+    }
+  }, [skipIntro, onIntroComplete]);
+
   useFrame(({ clock }) => {
     targetVec.current.set(...target);
     lookAtVec.current.set(...lookAt);
@@ -37,7 +52,10 @@ export default function CameraController({
       }
 
       const elapsed = clock.elapsedTime - introStartedAt.current;
-      const t = Math.min(elapsed / introDuration, 1);
+      const controlledT = Math.min(Math.max(introProgress ?? 0, 0), 1);
+      const t = hasControlledProgress
+        ? controlledT
+        : Math.min(elapsed / introDuration, 1);
       const pose = computeIntroCameraPose({
         t,
         introStart,
@@ -56,7 +74,7 @@ export default function CameraController({
         lastDebugEmitAt.current = clock.elapsedTime;
         onIntroFrame({
           phase: "intro",
-          elapsed,
+          elapsed: hasControlledProgress ? t * introDuration : elapsed,
           progress: t,
           easedProgress: pose.eased,
           orbitAngleRad: pose.orbitAngle,

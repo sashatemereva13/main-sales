@@ -1,14 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-
-function sampleGroundHeight(x, z) {
-  const swellA = Math.sin(x * 0.016) * Math.cos(z * 0.014) * 0.78;
-  const swellB = Math.sin((x + z) * 0.009) * 0.56;
-  const swellC = Math.cos((x - z) * 0.007) * 0.42;
-  const micro = Math.sin(x * 0.07 + z * 0.045) * 0.07;
-  return swellA + swellB + swellC + micro - 0.22;
-}
+import { sampleVisibleTerrainHeight } from "./terrainSurface";
 
 export default function Pond({
   center = [18, -18],
@@ -16,8 +9,8 @@ export default function Pond({
   radiusZ = 10,
 }) {
   const materialRef = useRef();
-  const ringY = sampleGroundHeight(center[0], center[1]) - 1.52;
-  const waterY = ringY + 0.08;
+  const ringY = sampleVisibleTerrainHeight(center[0], center[1]) - 1.22;
+  const waterY = ringY + 1.4;
 
   const shoreShape = useMemo(() => {
     const shape = new THREE.Shape();
@@ -49,7 +42,7 @@ export default function Pond({
   });
 
   return (
-    <group position={[center[0], 1.7, center[1]]}>
+    <group position={[center[0], 0, center[1]]}>
       <mesh
         geometry={shoreGeometry}
         position={[0, ringY, 0]}
