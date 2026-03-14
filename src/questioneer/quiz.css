@@ -3,18 +3,18 @@
 ====================================== */
 .quiz,
 .quiz-summary {
-  --summer-text-strong: rgba(255, 244, 224, 0.96);
-  --summer-text: rgba(245, 231, 204, 0.86);
-  --summer-text-muted: rgba(224, 207, 173, 0.68);
-  --summer-text-soft: rgba(210, 192, 160, 0.5);
-  --summer-glass: rgba(42, 31, 20, 0.08);
-  --summer-glass-strong: rgba(53, 38, 24, 0.12);
-  --summer-border: rgba(255, 223, 174, 0.09);
-  --summer-border-strong: rgba(255, 209, 141, 0.34);
-  --summer-accent: rgba(244, 177, 90, 0.9);
-  --summer-accent-soft: rgba(255, 208, 132, 0.7);
-  --summer-leaf: rgba(151, 188, 112, 0.8);
-  --summer-shadow: rgba(17, 11, 7, 0.34);
+  --summer-text-strong: rgba(205, 230, 184, 0.96);
+  --summer-text: rgba(186, 213, 164, 0.86);
+  --summer-text-muted: rgba(160, 190, 139, 0.72);
+  --summer-text-soft: rgba(137, 166, 118, 0.56);
+  --summer-glass: rgba(129, 76, 44, 0.08);
+  --summer-glass-strong: rgba(158, 96, 59, 0.14);
+  --summer-border: rgba(255, 216, 171, 0.14);
+  --summer-border-strong: rgba(243, 188, 123, 0.34);
+  --summer-accent: rgba(232, 160, 100, 0.92);
+  --summer-accent-soft: rgba(244, 200, 143, 0.72);
+  --summer-leaf: rgba(151, 188, 112, 0.88);
+  --summer-shadow: rgba(37, 21, 11, 0.28);
   --quiz-viewport-offset: calc(
     var(--quiz-nav-clearance-top, clamp(5.75rem, 10vh, 7.35rem)) +
       var(--quiz-nav-clearance-bottom, clamp(0.65rem, 2vh, 1.25rem)) +
@@ -47,18 +47,18 @@
   background:
     linear-gradient(
       180deg,
-      rgba(255, 245, 228, 0.04),
-      rgba(255, 222, 183, 0.015)
+      rgba(243, 195, 154, 0.12),
+      rgba(255, 216, 168, 0.05)
     ),
-    linear-gradient(180deg, rgba(110, 79, 48, 0.07), rgba(47, 33, 21, 0.035)),
+    linear-gradient(180deg, rgba(214, 130, 125, 0.08), rgba(86, 52, 31, 0.04)),
     repeating-linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.007) 0px,
-      rgba(255, 255, 255, 0.007) 1px,
+      rgba(255, 242, 228, 0.01) 0px,
+      rgba(255, 242, 228, 0.01) 1px,
       rgba(0, 0, 0, 0) 2px,
       rgba(0, 0, 0, 0) 5px
     ),
-    rgba(35, 25, 16, 0.055);
+    rgba(74, 46, 28, 0.12);
 
   backdrop-filter: blur(15px) saturate(112%);
   -webkit-backdrop-filter: blur(15px) saturate(112%);
@@ -126,11 +126,11 @@
   background:
     linear-gradient(
       180deg,
-      rgba(255, 246, 228, 0.035),
-      rgba(255, 222, 183, 0.012)
+      rgba(243, 195, 154, 0.1),
+      rgba(255, 216, 168, 0.04)
     ),
-    linear-gradient(180deg, rgba(68, 47, 28, 0.08), rgba(28, 18, 11, 0.04)),
-    rgba(39, 28, 19, 0.045);
+    linear-gradient(180deg, rgba(214, 130, 125, 0.07), rgba(63, 39, 24, 0.04)),
+    rgba(74, 46, 28, 0.1);
   backdrop-filter: blur(13px) saturate(108%);
   -webkit-backdrop-filter: blur(13px) saturate(108%);
   box-shadow:
@@ -201,12 +201,12 @@
   background:
     radial-gradient(
       ellipse at 50% 35%,
-      rgba(255, 215, 158, 0.08),
-      rgba(214, 152, 86, 0.05) 38%,
-      rgba(64, 41, 21, 0.05) 70%,
+      rgba(255, 216, 168, 0.12),
+      rgba(240, 174, 131, 0.08) 38%,
+      rgba(92, 57, 34, 0.06) 70%,
       rgba(24, 15, 10, 0) 100%
     ),
-    linear-gradient(180deg, rgba(52, 36, 22, 0.09), rgba(34, 23, 14, 0.04));
+    linear-gradient(180deg, rgba(214, 130, 125, 0.08), rgba(68, 43, 25, 0.05));
   border: 1px solid rgba(255, 221, 176, 0.03);
   box-shadow: inset 0 1px 0 rgba(255, 242, 220, 0.02);
   backdrop-filter: blur(8px) saturate(104%);

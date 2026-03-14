@@ -103,7 +103,7 @@ function App() {
       rabbitSlots: 3,
     };
   }, []);
-  const landingCameraTarget = [0, 5.6, 46];
+  const landingCameraTarget = [0, 10.6, 46];
   const [cameraTarget, setCameraTarget] = useState(landingCameraTarget);
   const [cameraIntroDone, setCameraIntroDone] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
@@ -214,6 +214,18 @@ function App() {
         locale={locale}
         onLocaleChange={setLocale}
         onEnterExplore={handleEnterExplore}
+        title={
+          showWelcome && !showQuiz && !exploreMode ? "amber composition" : null
+        }
+        subtitle={
+          showWelcome && !showQuiz && !exploreMode ? copy.intro.subtitle : null
+        }
+        showPrimaryCta={showIntroCta && showWelcome && !exploreMode}
+        primaryCtaLabel={copy.intro.startQuiz}
+        onPrimaryCta={handleStartQuiz}
+        ctaMeta={
+          showWelcome && !showQuiz && !exploreMode ? copy.intro.ctaMeta : null
+        }
       />
 
       {showSceneStage ? (
@@ -307,7 +319,7 @@ function App() {
                   paused={grassPaused}
                   hoverEnabled={grassHoverEnabled}
                 />
-                
+
                 <MeadowRoad />
 
                 {rabbitPositions
@@ -364,57 +376,6 @@ function App() {
                 </div>
               </div>
             ) : null}
-            <div
-              className={`intro-welcome-panel ${showWelcome && !exploreMode ? "is-visible" : ""}`}
-            >
-              <div className="intro-welcome-card">
-                <div className="intro-card-top">
-                  <div className="intro-card-top-left">
-                    <p className="intro-card-system-label">
-                      {copy.intro.discoverySession}
-                    </p>
-                    <div
-                      className="intro-card-tabs"
-                      aria-label={copy.intro.heroTabsAria}
-                    >
-                      <span className="intro-card-tab is-active">
-                        {copy.intro.welcome}
-                      </span>
-                      <span className="intro-card-tab">
-                        {copy.intro.studio}
-                      </span>
-                      <span className="intro-card-tab is-muted">
-                        {copy.intro.process}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="intro-card-top-right">
-                    <p className="intro-card-coord">
-                      {copy.intro.studioEnvironment}
-                    </p>
-                    <span className="intro-card-status">
-                      <span className="intro-card-status-dot" />
-                      {copy.intro.available}
-                    </span>
-                  </div>
-                </div>
-                <p className="intro-welcome-text">amber composition</p>
-
-                <p className="intro-welcome-subtext">{copy.intro.subtitle}</p>
-                {showIntroCta ? (
-                  <div className="intro-cta-group">
-                    <button
-                      type="button"
-                      className="intro-start-button"
-                      onClick={handleStartQuiz}
-                    >
-                      {copy.intro.startQuiz}
-                    </button>
-                    <p className="intro-cta-meta">{copy.intro.ctaMeta}</p>
-                  </div>
-                ) : null}
-              </div>
-            </div>
           </div>
           {exploreMode && !showQuiz ? (
             <div

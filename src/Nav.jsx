@@ -11,37 +11,54 @@ const Nav = ({
   locale = "fr",
   onLocaleChange,
   onEnterExplore,
+  title,
+  subtitle,
+  showPrimaryCta = false,
+  primaryCtaLabel,
+  onPrimaryCta,
+  ctaMeta,
 }) => {
   const copy = getCopy(locale);
+  const showQuizNav = activeTab === "quiz";
 
   return (
-    <nav className={`navigation ${reveal ? "is-revealed" : ""}`}>
+    <nav
+      className={`navigation ${reveal ? "is-revealed" : ""} ${showQuizNav ? "is-quiz-nav" : ""}`}
+    >
       <div className="nav-panel">
         <div className="nav-panel-left">
-          <div className="nav-system-row">
-            <p className="nav-system-label">{copy.nav.studioHud}</p>
-            <span className="nav-system-line" aria-hidden="true" />
-            <span className="nav-status-pill">
-              <span className="nav-status-dot" />
-              {copy.nav.meadowLive}
-            </span>
-          </div>
-
-          <p className="nav-tagline">{copy.nav.tagline}</p>
-
-          <div className="nav-tab-row" aria-label={copy.nav.navTabsAria}>
-            <span
-              className={`nav-tab ${activeTab === "scene" ? "is-active" : ""}`}
-            >
-              {copy.nav.scene}
-            </span>
-            <span
-              className={`nav-tab ${activeTab === "quiz" ? "is-active" : ""}`}
-            >
-              {copy.nav.quiz}
-            </span>
-            <span className="nav-tab is-muted">{copy.nav.recommendation}</span>
-          </div>
+          {showQuizNav ? (
+            <>
+              <p className="nav-kicker">{copy.nav.quiz}</p>
+              <div className="nav-tab-row" aria-label={copy.nav.navTabsAria}>
+                <span className="nav-tab is-active">{copy.nav.quiz}</span>
+                <span className="nav-tab is-muted">
+                  {copy.nav.recommendation}
+                </span>
+              </div>
+            </>
+          ) : (
+            <>
+              {title ? <p className="nav-title">{title}</p> : null}
+              <p className="nav-tagline">{copy.nav.tagline}</p>
+              {subtitle ? <p className="nav-subtitle">{subtitle}</p> : null}
+            </>
+          )}
+          {!showQuizNav && showPrimaryCta ? (
+            <div className="nav-cta-row">
+              <button
+                type="button"
+                className="nav-primary-button"
+                onClick={onPrimaryCta}
+              >
+                <span className="nav-primary-button-label">{primaryCtaLabel}</span>
+                <span className="nav-primary-button-arrow" aria-hidden="true">
+                  {"->"}
+                </span>
+              </button>
+              {ctaMeta ? <p className="nav-cta-meta">{ctaMeta}</p> : null}
+            </div>
+          ) : null}
         </div>
 
         <div className="nav-panel-right">
@@ -102,11 +119,6 @@ const Nav = ({
             >
               <img src={linkedin} alt="" />
             </a>
-          </div>
-
-          <div className="nav-foot-row">
-            <span className="nav-foot-line" aria-hidden="true" />
-            <p className="nav-mini-caption">{copy.nav.openChannels}</p>
           </div>
         </div>
       </div>
