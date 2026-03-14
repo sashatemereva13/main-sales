@@ -201,27 +201,31 @@ export default function Quiz({
     const tier = calculateTier(answers);
     const summary = generateClientSummary(answers, tier, locale);
     const userContact = answers.email || answers.contact || "";
+    const requestBody = new URLSearchParams({
+      data: JSON.stringify({
+        answers,
+        tier,
+        summary,
+        contact: userContact,
+      }),
+    });
 
     try {
       const response = await fetch(
         "https://apply.sasha13studio.pro/submit.php",
         {
           method: "POST",
+          mode: "no-cors",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: new URLSearchParams({
-            data: JSON.stringify({
-              answers,
-              tier,
-              summary,
-              contact: userContact,
-            }),
-          }),
+          body: requestBody,
         },
       );
 
-      if (response.ok) {
+      // The submit endpoint currently sends mail but does not expose CORS headers,
+      // so the browser returns an opaque response that cannot be inspected.
+      if (response.type === "opaque" || response.ok) {
         setSubmitted(true);
       } else {
         setSubmitError(
