@@ -317,7 +317,7 @@
 }
 
 .intro-annotation-top-right .intro-annotation-copy {
-  max-width: 13rem;
+  max-width: 15rem;
   text-align: right;
 }
 
@@ -690,7 +690,7 @@
   .intro-annotation-top-right {
     top: auto;
     right: 1rem;
-    bottom: calc(env(safe-area-inset-bottom) + 7.8rem);
+    bottom: calc(env(safe-area-inset-bottom) + 20.8rem);
     width: min(10rem, 42vw);
   }
 

@@ -26,13 +26,10 @@ export const UI_COPY = {
       heroTabsAria: "Onglets d’accueil",
       scrollHint: "Scroll down",
       annotations: {
-        presents: "Sasha XIII\npresente",
-        format: "Experience digitale",
-        type: "Premium",
-        lineNote: "Brand philosophy translated into web presence",
-        footerLeft: "Strategie\nDirection\nNarration",
-        footerCenter: "Sur mesure\npour experts",
-        footerRight: "Studio\nsignal",
+        presents: "Amber Composition Studio",
+        format: "sites web",
+        type: "premium",
+        lineNote: "La philosophie de marque traduite en présence digitale",
       },
     },
     quiz: {
@@ -117,9 +114,6 @@ export const UI_COPY = {
         format: "premium",
         type: "websites",
         lineNote: "Brand philosophy translated into web presence",
-        footerLeft: "Strategy\nDirection\nNarrative",
-        footerCenter: "Bespoke\nfor experts",
-        footerRight: "Studio\nsignal",
       },
     },
     quiz: {
