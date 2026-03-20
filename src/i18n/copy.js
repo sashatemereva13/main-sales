@@ -111,9 +111,9 @@ export const UI_COPY = {
       scrollHint: "Scroll down",
       annotations: {
         presents: "Amber Composition Studio",
-        format: "premium",
-        type: "websites",
-        lineNote: "Brand philosophy translated into web presence",
+        format: "Premium websites and immersive digital experiences ",
+        type: "for brands, artists, and founders with a point of view",
+        lineNote: "Brand philosophy, translated into digital presence",
       },
     },
     quiz: {

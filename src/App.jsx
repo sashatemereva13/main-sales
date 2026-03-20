@@ -1,16 +1,14 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import Nav from "./Nav";
 import "./css/intro.css";
-import SkyIntroText from "./intro/SkyIntroText";
-import IntroSwirlAnchor from "./intro/IntroSwirlAnchor";
 
 import GoldenSky from "./summerscene/GoldenSky";
 import SunLight from "./summerscene/Sunlight";
 import Ground from "./summerscene/Ground";
 import Trees from "./summerscene/Trees";
-import ForestBackdrop from "./summerscene/ForestBackdrop";
 import MeadowRoad from "./summerscene/MeadowRoad";
+import SceneParallaxRig from "./summerscene/SceneParallaxRig";
 import WhitePavilion, {
   WHITE_PAVILION_LOOK_AT_POSITION,
 } from "./summerscene/WhitePavilion";
@@ -107,12 +105,7 @@ function App() {
   const [cameraIntroDone, setCameraIntroDone] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
-  const [introScrollProgress, setIntroScrollProgress] = useState(0);
   const [introCameraDebug, setIntroCameraDebug] = useState(null);
-  const [hasTriggeredIntroHintNudge, setHasTriggeredIntroHintNudge] =
-    useState(false);
-  const [introHintNudging, setIntroHintNudging] = useState(false);
-  const introScrollRef = useRef(null);
   const introCameraStart = [-90, 80, 220];
   const introCameraDuration = 5.2;
   const introLookAtEnd = WHITE_PAVILION_LOOK_AT_POSITION;
@@ -126,7 +119,7 @@ function App() {
   const introOrbitUntil = 0.82;
   const orbitMode = debugOrbit;
   const showIntroCta = (cameraIntroDone || orbitMode) && !showQuiz;
-  const introScrollEnabled = !orbitMode && !cameraIntroDone && !showQuiz;
+  const showIntroSequence = !orbitMode && !cameraIntroDone && !showQuiz;
   const showSceneStage = !showQuiz;
 
   const handleStartQuiz = () => {
@@ -141,11 +134,6 @@ function App() {
     setShowWelcome(true);
     setCameraIntroDone(true);
     setCameraTarget(landingCameraTarget);
-  };
-  const handleIntroHintInteraction = () => {
-    if (hasTriggeredIntroHintNudge || !introScrollEnabled) return;
-    setHasTriggeredIntroHintNudge(true);
-    setIntroHintNudging(true);
   };
   const rabbitPositions = [
     [0, 0.5, 12],
@@ -170,32 +158,6 @@ function App() {
       window.localStorage.setItem("site-locale", locale);
     }
   }, [locale]);
-
-  useEffect(() => {
-    if (cameraIntroDone || showQuiz || orbitMode) return;
-    if (introScrollProgress >= 0.995) {
-      setCameraIntroDone(true);
-      setShowWelcome(true);
-    }
-  }, [cameraIntroDone, introScrollProgress, orbitMode, showQuiz]);
-
-  useEffect(() => {
-    if (!introScrollEnabled && introScrollRef.current) {
-      introScrollRef.current.scrollTop = 0;
-    }
-  }, [introScrollEnabled]);
-
-  useEffect(() => {
-    if (!introHintNudging) return undefined;
-
-    const timeoutId = window.setTimeout(() => {
-      setIntroHintNudging(false);
-    }, 900);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [introHintNudging]);
 
   return (
     <>
@@ -259,9 +221,6 @@ function App() {
                   target={cameraTarget}
                   introStart={introCameraStart}
                   introDuration={introCameraDuration}
-                  introProgress={
-                    introScrollEnabled ? introScrollProgress : undefined
-                  }
                   introLookAtStart={introLookAtStart}
                   introOrbitTurns={introOrbitTurns}
                   introOrbitStart={introOrbitStart}
@@ -279,25 +238,13 @@ function App() {
                   }}
                 />
               )}
-              {/* <IntroSwirlAnchor
-                position={introLookAtEnd}
-                introProgress={introScrollEnabled ? introScrollProgress : 1}
-                beamLength={13.5}
-              /> */}
               <GoldenSky />
-              {/* {!orbitMode && !cameraIntroDone ? (
-                <SkyIntroText
-                  duration={introCameraDuration}
-                  locale={locale}
-                  progressOverride={introScrollProgress}
-                />
-              ) : null} */}
               <SunLight
                 shadows={deviceProfile.shadows}
                 shadowMapSize={deviceProfile.shadowMapSize}
               />
 
-              <group>
+              <SceneParallaxRig disabled={orbitMode || deviceProfile.isMobile}>
                 <WhitePavilion />
                 <Ground />
                 <Trees count={5} />
@@ -320,29 +267,14 @@ function App() {
                       paused={wildlifePaused}
                     />
                   ))}
-              </group>
+              </SceneParallaxRig>
             </Canvas>
           </div>
 
           <div
             className={`intro-overlay ${cameraIntroDone || orbitMode ? "camera-finished" : ""} ${showQuiz || orbitMode ? "sequence-finished" : ""}`}
           >
-            {introScrollEnabled ? (
-              <div
-                className={`intro-scroll-prompt ${introHintNudging ? "is-nudging" : ""}`}
-                role="note"
-                aria-live="polite"
-              >
-                <span className="intro-scroll-arrow" aria-hidden="true">
-                  <span className="intro-scroll-arrow-chevron" />
-                  <span className="intro-scroll-arrow-chevron" />
-                </span>
-                <span className="intro-scroll-prompt-text">
-                  {copy.intro.scrollHint}
-                </span>
-              </div>
-            ) : null}
-            {!showQuiz && !orbitMode && !cameraIntroDone ? (
+            {showIntroSequence ? (
               <div className="intro-annotation-layer" aria-hidden="true">
                 <div className="intro-annotation intro-annotation-top-left">
                   <p className="intro-annotation-script">
@@ -366,21 +298,6 @@ function App() {
               </div>
             ) : null}
           </div>
-          {introScrollEnabled ? (
-            <div
-              ref={introScrollRef}
-              className="intro-scroll-layer"
-              onWheel={handleIntroHintInteraction}
-              onTouchStart={handleIntroHintInteraction}
-              onScroll={(event) => {
-                const node = event.currentTarget;
-                const max = Math.max(node.scrollHeight - node.clientHeight, 1);
-                setIntroScrollProgress(node.scrollTop / max);
-              }}
-            >
-              <div className="intro-scroll-spacer" />
-            </div>
-          ) : null}
         </>
       ) : null}
 
