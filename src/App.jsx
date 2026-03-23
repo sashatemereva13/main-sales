@@ -1,5 +1,6 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, lazy, useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Nav from "./Nav";
 import "./css/intro.css";
 
@@ -10,6 +11,8 @@ import Trees from "./summerscene/Trees";
 import MeadowRoad from "./summerscene/MeadowRoad";
 import SceneParallaxRig from "./summerscene/SceneParallaxRig";
 import WhitePavilion, {
+  WHITE_PAVILION_INTERIOR_CAMERA_POSITION,
+  WHITE_PAVILION_INTERIOR_LOOK_AT_POSITION,
   WHITE_PAVILION_LOOK_AT_POSITION,
 } from "./summerscene/WhitePavilion";
 
@@ -17,14 +20,21 @@ import Rabbit from "./summerscene/Rabbit";
 import GrassBlades from "./summerscene/GrassField";
 import CameraController from "./questioneer/CameraController";
 import { getCopy } from "./i18n/copy";
+import HeroTitle from "./hero/HeroTitle";
 
-const Quiz = lazy(() => import("./questioneer/Quiz"));
+const Configurator = lazy(
+  () => import("./components/configurator/Configurator"),
+);
 const IntroPathDebug = lazy(() => import("./intro/IntroPathDebug"));
 const OrbitControls = lazy(() =>
   import("@react-three/drei").then((mod) => ({ default: mod.OrbitControls })),
 );
 
+const LAB_ROUTE_TRANSITION_MS = 1150;
+
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [locale, setLocale] = useState(() => {
     if (typeof window === "undefined") return "fr";
     const saved = window.localStorage.getItem("site-locale");
@@ -102,10 +112,14 @@ function App() {
   }, []);
   const landingCameraTarget = [0, 10.6, 46];
   const [cameraTarget, setCameraTarget] = useState(landingCameraTarget);
+  const [cameraLookAt, setCameraLookAt] = useState(
+    WHITE_PAVILION_LOOK_AT_POSITION,
+  );
   const [cameraIntroDone, setCameraIntroDone] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false);
+  const [isLabLaunching, setIsLabLaunching] = useState(false);
   const [introCameraDebug, setIntroCameraDebug] = useState(null);
+  const labLaunchTimeoutRef = useRef(null);
   const introCameraStart = [-90, 80, 220];
   const introCameraDuration = 5.2;
   const introLookAtEnd = WHITE_PAVILION_LOOK_AT_POSITION;
@@ -118,36 +132,54 @@ function App() {
   const introOrbitStart = 0;
   const introOrbitUntil = 0.82;
   const orbitMode = debugOrbit;
-  const showIntroCta = (cameraIntroDone || orbitMode) && !showQuiz;
-  const showIntroSequence = !orbitMode && !cameraIntroDone && !showQuiz;
-  const showSceneStage = !showQuiz;
+  const isLabRoute = location.pathname === "/lab";
+  const isConfiguratorActive = isLabRoute || isLabLaunching;
+  const showIntroCta = (cameraIntroDone || orbitMode) && !isConfiguratorActive;
+  const showIntroSequence =
+    !orbitMode && !cameraIntroDone && !isConfiguratorActive;
+  const showSceneStage = !isLabRoute;
 
   const handleStartQuiz = () => {
+    if (labLaunchTimeoutRef.current) {
+      window.clearTimeout(labLaunchTimeoutRef.current);
+    }
     if (!cameraIntroDone) {
       setCameraIntroDone(true);
     }
     setShowWelcome(false);
-    setShowQuiz(true);
+    setIsLabLaunching(true);
+    setCameraTarget(WHITE_PAVILION_INTERIOR_CAMERA_POSITION);
+    setCameraLookAt(WHITE_PAVILION_INTERIOR_LOOK_AT_POSITION);
+    labLaunchTimeoutRef.current = window.setTimeout(() => {
+      labLaunchTimeoutRef.current = null;
+      navigate("/lab");
+    }, LAB_ROUTE_TRANSITION_MS);
   };
   const handleBackToLanding = () => {
-    setShowQuiz(false);
+    if (labLaunchTimeoutRef.current) {
+      window.clearTimeout(labLaunchTimeoutRef.current);
+      labLaunchTimeoutRef.current = null;
+    }
+    setIsLabLaunching(false);
     setShowWelcome(true);
     setCameraIntroDone(true);
     setCameraTarget(landingCameraTarget);
+    setCameraLookAt(introLookAtEnd);
+    navigate("/");
   };
   const rabbitPositions = [
     [0, 0.5, 12],
     [-2, 0.35, -10],
     [2, 0.8, -28],
   ];
-  const wildlifePaused = showQuiz || deviceProfile.lowPower;
+  const wildlifePaused = isConfiguratorActive || deviceProfile.lowPower;
   const grassQuality = deviceProfile.lowPower
     ? "low"
     : deviceProfile.grassCount < 70000
       ? "mid"
       : "high";
-  const grassPaused = showQuiz && !orbitMode;
-  const grassHoverEnabled = !showQuiz && !deviceProfile.isMobile;
+  const grassPaused = isConfiguratorActive && !orbitMode;
+  const grassHoverEnabled = !isConfiguratorActive && !deviceProfile.isMobile;
   const copy = getCopy(locale);
 
   useEffect(() => {
@@ -159,24 +191,47 @@ function App() {
     }
   }, [locale]);
 
+  useEffect(() => {
+    return () => {
+      if (labLaunchTimeoutRef.current) {
+        window.clearTimeout(labLaunchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isLabRoute) {
+      setIsLabLaunching(false);
+      setCameraIntroDone(true);
+      setShowWelcome(false);
+      return;
+    }
+
+    setIsLabLaunching(false);
+    setCameraTarget(landingCameraTarget);
+    setCameraLookAt(introLookAtEnd);
+  }, [introLookAtEnd, isLabRoute]);
+
   return (
     <>
       <Nav
-        reveal={cameraIntroDone || orbitMode}
-        activeTab={showQuiz ? "quiz" : "scene"}
+        reveal={isLabRoute || cameraIntroDone || orbitMode}
+        activeTab={isLabRoute ? "configurator" : "scene"}
         locale={locale}
         onLocaleChange={setLocale}
         onBackToLanding={handleBackToLanding}
         title={
-          showWelcome && !showQuiz ? "amber composition" : null
+          showWelcome && !isConfiguratorActive ? "amber composition hub" : null
         }
         subtitle={
-          showWelcome && !showQuiz ? copy.intro.subtitle : null
+          showWelcome && !isConfiguratorActive ? copy.intro.subtitle : null
         }
         showPrimaryCta={showIntroCta && showWelcome}
         primaryCtaLabel={copy.intro.startQuiz}
         onPrimaryCta={handleStartQuiz}
-        ctaMeta={showWelcome && !showQuiz ? copy.intro.ctaMeta : null}
+        ctaMeta={
+          showWelcome && !isConfiguratorActive ? copy.intro.ctaMeta : null
+        }
       />
 
       {showSceneStage ? (
@@ -231,7 +286,7 @@ function App() {
                       setIntroCameraDebug(frame);
                     }
                   }}
-                  lookAt={introLookAtEnd}
+                  lookAt={cameraLookAt}
                   onIntroComplete={() => {
                     setCameraIntroDone(true);
                     setShowWelcome(true);
@@ -244,7 +299,12 @@ function App() {
                 shadowMapSize={deviceProfile.shadowMapSize}
               />
 
-              <SceneParallaxRig disabled={orbitMode || deviceProfile.isMobile}>
+              <HeroTitle />
+              <SceneParallaxRig
+                disabled={
+                  orbitMode || deviceProfile.isMobile || isConfiguratorActive
+                }
+              >
                 <WhitePavilion />
                 <Ground />
                 <Trees count={5} />
@@ -272,7 +332,7 @@ function App() {
           </div>
 
           <div
-            className={`intro-overlay ${cameraIntroDone || orbitMode ? "camera-finished" : ""} ${showQuiz || orbitMode ? "sequence-finished" : ""}`}
+            className={`intro-overlay ${cameraIntroDone || orbitMode ? "camera-finished" : ""} ${isConfiguratorActive || orbitMode ? "sequence-finished" : ""}`}
           >
             {showIntroSequence ? (
               <div className="intro-annotation-layer" aria-hidden="true">
@@ -297,21 +357,38 @@ function App() {
                 </div>
               </div>
             ) : null}
+            {/* {showWelcome && !isConfiguratorActive ? (
+              <div className="intro-hero-panel">
+                <div className="intro-hero-copy">
+                  <p className="intro-hero-kicker">{copy.intro.heroKicker}</p>
+                  <h1 className="intro-hero-title">{copy.intro.heroTitle}</h1>
+                  <p className="intro-hero-lead">{copy.intro.heroLead}</p>
+                </div>
+                <div className="intro-hero-metrics" aria-label="Studio strengths">
+                  {copy.intro.heroMetrics?.map((metric) => (
+                    <span key={metric} className="intro-hero-metric">
+                      {metric}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null} */}
           </div>
         </>
       ) : null}
 
-      {showQuiz ? (
+      {isLabRoute ? (
         <div className="quiz-stage">
           <div className="quiz-stage-background" aria-hidden="true" />
-          <div className="quiz-intro-enter">
-            <Suspense fallback={null}>
-              <Quiz
-                locale={locale}
-                setCameraTarget={setCameraTarget}
-                initialCameraTarget={landingCameraTarget}
-              />
-            </Suspense>
+          <div className="quiz-stage-screen-shell">
+            <div className="quiz-stage-screen-glow" aria-hidden="true" />
+            <div className="quiz-stage-screen">
+              <div className="quiz-intro-enter">
+                <Suspense fallback={null}>
+                  <Configurator locale={locale} />
+                </Suspense>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}

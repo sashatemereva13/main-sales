@@ -6,6 +6,8 @@ export const UI_COPY = {
       tagline: "Des expériences digitales personnalisées",
       scene: "Scène",
       quiz: "Quiz",
+      configurator: "Configurateur",
+      websiteLab: "Laboratoire",
       recommendation: "Recommandation",
       openChannels: "Canaux ouverts",
       localeFr: "FR",
@@ -21,8 +23,13 @@ export const UI_COPY = {
       studioEnvironment: "Environnement studio",
       available: "Disponible",
       subtitle: "Des sites strategiques qui convertissent",
-      startQuiz: "Commencer le quiz",
+      startQuiz: "Website Builder",
       ctaMeta: "3 min • plan web personnalise",
+      heroKicker: "Laboratoire créatif digital",
+      heroTitle: "Des experiences web pensees comme des systemes vivants",
+      heroLead:
+        "Entre direction artistique, technologie sensible et strategie claire, nous concevons des sites qui semblent deja en mouvement.",
+      heroMetrics: ["Direction artistique", "Systemes interactifs", "Narration digitale"],
       heroTabsAria: "Onglets d’accueil",
       scrollHint: "Scroll down",
       annotations: {
@@ -82,6 +89,30 @@ export const UI_COPY = {
       back: "← retour",
       question: "Question",
     },
+    configurator: {
+      eyebrow: "Laboratoire du site",
+      title: "Composez votre site comme une collection sur-mesure",
+      subtitle:
+        "Choisissez les modules, le niveau de présence digitale et les outils dont votre site a besoin.",
+      searchPlaceholder: "Rechercher une fonctionnalité",
+      allCategories: "Tout",
+      resultsLabel: "{count} modules disponibles",
+      selectedCount: "{count} sélectionnés",
+      emptyResults: "Aucun module ne correspond à votre recherche.",
+      summaryTitle: "Votre sélection",
+      summarySubtitle: "Estimation en direct pour votre configuration actuelle",
+      totalLabel: "Total estimé",
+      summaryEmpty:
+        "Ajoutez quelques modules pour construire votre configuration.",
+      mobileSummaryButton: "Voir le résumé",
+      includedLabel: "Inclus",
+      categories: {
+        looks: "Identité visuelle",
+        functionality: "Fonctionnalités",
+        page: "Pages",
+        feature: "Modules",
+      },
+    },
   },
   en: {
     nav: {
@@ -90,6 +121,8 @@ export const UI_COPY = {
       tagline: "Custom digital experiences",
       scene: "Scene",
       quiz: "Quiz",
+      configurator: "Configurator",
+      websiteLab: "Website Lab",
       recommendation: "Recommendation",
       openChannels: "Open channels",
       localeFr: "FR",
@@ -105,8 +138,13 @@ export const UI_COPY = {
       studioEnvironment: "Studio Environment",
       available: "Available",
       subtitle: "Websites that attract",
-      startQuiz: "Start Quiz",
+      startQuiz: "Website Builder",
       ctaMeta: "3 min • personalized web plan",
+      heroKicker: "Creative digital laboratory",
+      heroTitle: "Web experiences designed like living systems",
+      heroLead:
+        "Between art direction, sensitive technology, and strategic clarity, we craft websites that already feel in motion.",
+      heroMetrics: ["Art direction", "Interactive systems", "Digital storytelling"],
       heroTabsAria: "Hero tabs",
       scrollHint: "Scroll down",
       annotations: {
@@ -163,6 +201,29 @@ export const UI_COPY = {
     quizNav: {
       back: "← back",
       question: "Question",
+    },
+    configurator: {
+      eyebrow: "Website laboratory",
+      title: "you design your digital presence, i build it",
+      subtitle:
+        "Choose the modules, the level of digital presence, and the tools your site needs.",
+      searchPlaceholder: "Search for a feature",
+      allCategories: "All",
+      resultsLabel: "{count} modules available",
+      selectedCount: "{count} selected",
+      emptyResults: "No modules match your current search.",
+      summaryTitle: "Your selection",
+      summarySubtitle: "Live estimate for your current configuration",
+      totalLabel: "Estimated total",
+      summaryEmpty: "Add a few modules to start building your website.",
+      mobileSummaryButton: "View summary",
+      includedLabel: "Included",
+      categories: {
+        looks: "Looks",
+        functionality: "Functionality",
+        page: "Pages",
+        feature: "Features",
+      },
     },
   },
 };
