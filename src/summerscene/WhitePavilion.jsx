@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Text } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -55,7 +55,12 @@ export const WHITE_PAVILION_SWIRL_POSITION = Object.freeze([
 
 const _color = new THREE.Color();
 
-function GlassPillar({ position, height = 9.4, rotation = [0, 0, 0] }) {
+function GlassPillar({
+  position,
+  height = 9.4,
+  rotation = [0, 0, 0],
+  preserveGlass = true,
+}) {
   return (
     <group position={position} rotation={rotation}>
       <mesh position={[0, height * 0.5, 0]} castShadow receiveShadow>
@@ -64,13 +69,13 @@ function GlassPillar({ position, height = 9.4, rotation = [0, 0, 0] }) {
           color="#ffe7d2"
           transparent
           opacity={0.48}
-          roughness={0.14}
+          roughness={preserveGlass ? 0.14 : 0.42}
           metalness={0}
-          transmission={0.72}
-          thickness={1.1}
+          transmission={preserveGlass ? 0.72 : 0}
+          thickness={preserveGlass ? 1.1 : 0.2}
           ior={1.12}
           emissive="#f6c9b6"
-          emissiveIntensity={0.12}
+          emissiveIntensity={preserveGlass ? 0.12 : 0.08}
         />
       </mesh>
       <mesh position={[0, height + 1.35, 0]}>
@@ -101,7 +106,7 @@ function BeamPlane({ position, rotation, scale = [1, 1, 1], opacity = 0.14 }) {
   );
 }
 
-function LabDisplayScreen() {
+function LabDisplayScreen({ preserveGlass = true }) {
   const screenRef = useRef(null);
 
   useFrame(({ clock }) => {
@@ -133,11 +138,11 @@ function LabDisplayScreen() {
         <cylinderGeometry args={[2.08, 2.08, 0.14, 64]} />
         <meshPhysicalMaterial
           color="#ffe3d0"
-          roughness={0.2}
+          roughness={preserveGlass ? 0.2 : 0.42}
           metalness={0.04}
           clearcoat={0.82}
           clearcoatRoughness={0.18}
-          transmission={0.06}
+          transmission={preserveGlass ? 0.06 : 0}
           emissive="#f6b695"
           emissiveIntensity={0.06}
         />
@@ -322,7 +327,7 @@ function AmbientHalo() {
   );
 }
 
-export default function WhitePavilion() {
+export default function WhitePavilion({ preserveGlass = true }) {
   const labGroupRef = useRef(null);
   const ringRefs = useRef([]);
   const orbitNodesRef = useRef([]);
@@ -354,6 +359,13 @@ export default function WhitePavilion() {
       }),
     [],
   );
+
+  useEffect(() => {
+    return () => {
+      plinthMaterial.dispose();
+      frameMaterial.dispose();
+    };
+  }, [frameMaterial, plinthMaterial]);
 
   const nodeAnchors = useMemo(
     () => [
@@ -465,7 +477,7 @@ export default function WhitePavilion() {
 
       <group ref={labGroupRef} position={[0, 0.6, 0]}>
         <AmbientHalo />
-        <LabDisplayScreen />
+        <LabDisplayScreen preserveGlass={preserveGlass} />
 
         {pillarData.map((pillar, index) => (
           <GlassPillar
@@ -473,6 +485,7 @@ export default function WhitePavilion() {
             position={pillar.position}
             height={pillar.height}
             rotation={pillar.rotation}
+            preserveGlass={preserveGlass}
           />
         ))}
 

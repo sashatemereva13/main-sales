@@ -1,35 +1,6 @@
 // GoldenSky.jsx
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-
-function createSunTexture(size = 256, innerAlpha = 1, outerAlpha = 0) {
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  const gradient = ctx.createRadialGradient(
-    size * 0.5,
-    size * 0.5,
-    size * 0.08,
-    size * 0.5,
-    size * 0.5,
-    size * 0.5,
-  );
-
-  gradient.addColorStop(0, `rgba(255, 250, 236, ${innerAlpha})`);
-  gradient.addColorStop(0.28, "rgba(255, 222, 173, 0.92)");
-  gradient.addColorStop(0.58, "rgba(255, 178, 112, 0.48)");
-  gradient.addColorStop(1, `rgba(255, 149, 92, ${outerAlpha})`);
-
-  ctx.clearRect(0, 0, size, size);
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.needsUpdate = true;
-  return texture;
-}
 
 export default function GoldenSky() {
   const material = useMemo(() => {
@@ -77,8 +48,11 @@ export default function GoldenSky() {
     });
   }, []);
 
-  const sunCoreTexture = useMemo(() => createSunTexture(256, 1, 0), []);
-  const sunGlowTexture = useMemo(() => createSunTexture(256, 0.8, 0), []);
+  useEffect(() => {
+    return () => {
+      material.dispose();
+    };
+  }, [material]);
 
   return (
     <group position={[0, 0, 0]}>

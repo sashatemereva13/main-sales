@@ -19,6 +19,79 @@ body,
   height: 100vh;
 }
 
+.sceneContainer-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.webgl-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(21, 14, 11, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.webgl-fallback-panel {
+  width: min(34rem, calc(100vw - 3rem));
+  padding: 1.4rem;
+  border: 1px solid rgba(255, 241, 225, 0.18);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at top left, rgba(255, 216, 168, 0.16), transparent 32%),
+    linear-gradient(180deg, rgba(33, 22, 18, 0.92), rgba(24, 16, 13, 0.88));
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
+  color: #f7ecde;
+}
+
+.webgl-fallback-eyebrow,
+.webgl-fallback-title,
+.webgl-fallback-copy {
+  margin: 0;
+}
+
+.webgl-fallback-eyebrow {
+  font-family: "Panchang-Light", sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 222, 194, 0.7);
+}
+
+.webgl-fallback-title {
+  margin-top: 0.55rem;
+  font-family: "Panchang-Light", sans-serif;
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  line-height: 1.15;
+}
+
+.webgl-fallback-copy {
+  margin-top: 0.75rem;
+  line-height: 1.6;
+  color: rgba(247, 236, 222, 0.82);
+}
+
+.webgl-fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.webgl-fallback-actions button {
+  border: 1px solid rgba(255, 226, 190, 0.24);
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  color: #fff5e8;
+  background: rgba(255, 216, 168, 0.08);
+  cursor: pointer;
+}
+
 button {
   font-family: "Panchang-Light", sans-serif;
 }

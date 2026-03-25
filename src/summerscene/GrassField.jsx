@@ -360,7 +360,7 @@ function populateGrassLayer({
   dummyB,
   depthBias = 1,
 }) {
-  if (!meshA || !meshB || count <= 0) return;
+  if (!meshA || count <= 0) return;
 
   const [minZ, maxZ] = zRange;
   const [minX, maxX] = xRange;
@@ -405,25 +405,29 @@ function populateGrassLayer({
     dummyA.updateMatrix();
     meshA.setMatrixAt(placed, dummyA.matrix);
 
-    dummyB.position.set(x, terrainY, z);
-    dummyB.rotation.set(0, yaw + Math.PI * 0.5, 0);
-    dummyB.scale.set(width, height, 1);
-    dummyB.updateMatrix();
-    meshB.setMatrixAt(placed, dummyB.matrix);
+    if (meshB) {
+      dummyB.position.set(x, terrainY, z);
+      dummyB.rotation.set(0, yaw + Math.PI * 0.5, 0);
+      dummyB.scale.set(width, height, 1);
+      dummyB.updateMatrix();
+      meshB.setMatrixAt(placed, dummyB.matrix);
+    }
 
     tempColor.setRGB(1, 1, 1);
     meshA.setColorAt(placed, tempColor);
-    meshB.setColorAt(placed, tempColor);
+    if (meshB) meshB.setColorAt(placed, tempColor);
 
     placed++;
   }
 
   meshA.count = placed;
-  meshB.count = placed;
+  if (meshB) meshB.count = placed;
   meshA.instanceMatrix.needsUpdate = true;
-  meshB.instanceMatrix.needsUpdate = true;
+  if (meshB) meshB.instanceMatrix.needsUpdate = true;
   if (meshA.instanceColor) meshA.instanceColor.needsUpdate = true;
-  if (meshB.instanceColor) meshB.instanceColor.needsUpdate = true;
+  if (meshB?.instanceColor) meshB.instanceColor.needsUpdate = true;
+  meshA.computeBoundingSphere();
+  if (meshB) meshB.computeBoundingSphere();
 }
 
 export default function GrassBlades({
@@ -431,6 +435,8 @@ export default function GrassBlades({
   quality = "high",
   paused = false,
   hoverEnabled = true,
+  crossLayers = true,
+  conservative = false,
 }) {
   const variantCount = quality === "low" ? 2 : TEX_VARIANTS;
   const textureAnisotropy = quality === "low" ? 1 : quality === "mid" ? 2 : 4;
@@ -564,6 +570,13 @@ export default function GrassBlades({
     };
   }, [textures]);
 
+  useEffect(() => {
+    return () => {
+      geometryBase.dispose();
+      geometryForeground.dispose();
+    };
+  }, [geometryBase, geometryForeground]);
+
   useFrame((state) => {
     if (paused) return;
 
@@ -593,6 +606,15 @@ export default function GrassBlades({
     }
   });
 
+  const materialProps = {
+    vertexShader: VERTEX_SHADER,
+    fragmentShader: FRAGMENT_SHADER,
+    transparent: !conservative,
+    alphaTest: 0.38,
+    depthWrite: conservative,
+    side: crossLayers ? THREE.FrontSide : THREE.DoubleSide,
+  };
+
   return (
     <>
       {Array.from({ length: variantCount }).map((_, i) => (
@@ -602,7 +624,6 @@ export default function GrassBlades({
               baseMeshARefs.current[i] = el;
             }}
             args={[geometryBase, null, baseVariantCounts[i]]}
-            frustumCulled={false}
           >
             <shaderMaterial
               ref={(el) => {
@@ -614,45 +635,37 @@ export default function GrassBlades({
                 uHoverRadius: { value: hoverRadiusBase },
                 uGrassTex: { value: textures[i] },
               }}
-              vertexShader={VERTEX_SHADER}
-              fragmentShader={FRAGMENT_SHADER}
-              transparent
-              alphaTest={0.38}
-              side={THREE.DoubleSide}
+              {...materialProps}
             />
           </instancedMesh>
 
-          <instancedMesh
-            ref={(el) => {
-              baseMeshBRefs.current[i] = el;
-            }}
-            args={[geometryBase, null, baseVariantCounts[i]]}
-            frustumCulled={false}
-          >
-            <shaderMaterial
+          {crossLayers ? (
+            <instancedMesh
               ref={(el) => {
-                baseMatBRefs.current[i] = el;
+                baseMeshBRefs.current[i] = el;
               }}
-              uniforms={{
-                uTime: { value: 0 },
-                uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
-                uHoverRadius: { value: hoverRadiusBase },
-                uGrassTex: { value: textures[i] },
-              }}
-              vertexShader={VERTEX_SHADER}
-              fragmentShader={FRAGMENT_SHADER}
-              transparent
-              alphaTest={0.38}
-              side={THREE.DoubleSide}
-            />
-          </instancedMesh>
+              args={[geometryBase, null, baseVariantCounts[i]]}
+            >
+              <shaderMaterial
+                ref={(el) => {
+                  baseMatBRefs.current[i] = el;
+                }}
+                uniforms={{
+                  uTime: { value: 0 },
+                  uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
+                  uHoverRadius: { value: hoverRadiusBase },
+                  uGrassTex: { value: textures[i] },
+                }}
+                {...materialProps}
+              />
+            </instancedMesh>
+          ) : null}
         </group>
       ))}
 
       <instancedMesh
         ref={fgMeshARef}
         args={[geometryForeground, null, foregroundCount]}
-        frustumCulled={false}
       >
         <shaderMaterial
           ref={fgMatARef}
@@ -662,34 +675,27 @@ export default function GrassBlades({
             uHoverRadius: { value: hoverRadiusFg },
             uGrassTex: { value: textures[Math.min(textures.length - 1, 2)] },
           }}
-          vertexShader={VERTEX_SHADER}
-          fragmentShader={FRAGMENT_SHADER}
-          transparent
-          alphaTest={0.38}
-          side={THREE.DoubleSide}
+          {...materialProps}
         />
       </instancedMesh>
 
-      <instancedMesh
-        ref={fgMeshBRef}
-        args={[geometryForeground, null, foregroundCount]}
-        frustumCulled={false}
-      >
-        <shaderMaterial
-          ref={fgMatBRef}
-          uniforms={{
-            uTime: { value: 0 },
-            uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
-            uHoverRadius: { value: hoverRadiusFg },
-            uGrassTex: { value: textures[Math.min(textures.length - 1, 2)] },
-          }}
-          vertexShader={VERTEX_SHADER}
-          fragmentShader={FRAGMENT_SHADER}
-          transparent
-          alphaTest={0.38}
-          side={THREE.DoubleSide}
-        />
-      </instancedMesh>
+      {crossLayers ? (
+        <instancedMesh
+          ref={fgMeshBRef}
+          args={[geometryForeground, null, foregroundCount]}
+        >
+          <shaderMaterial
+            ref={fgMatBRef}
+            uniforms={{
+              uTime: { value: 0 },
+              uHover: { value: new THREE.Vector3(9999, -1.4, 9999) },
+              uHoverRadius: { value: hoverRadiusFg },
+              uGrassTex: { value: textures[Math.min(textures.length - 1, 2)] },
+            }}
+            {...materialProps}
+          />
+        </instancedMesh>
+      ) : null}
     </>
   );
 }

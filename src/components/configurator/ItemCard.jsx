@@ -1,3 +1,8 @@
+import {
+  getItemPreviewArtwork,
+  getPreviewVariant,
+} from "./itemPreviewArtwork";
+
 export default function ItemCard({
   item,
   index = 0,
@@ -10,6 +15,7 @@ export default function ItemCard({
   removeLabel = "Remove",
 }) {
   const previewVariant = getPreviewVariant(item);
+  const previewArtwork = getItemPreviewArtwork(item, previewVariant);
   const categoryLabel = item.type || item.category;
 
   return (
@@ -34,9 +40,17 @@ export default function ItemCard({
         <div className="configurator-card-preview-frame">
           <div className="configurator-card-preview-surface">
             <div className="configurator-card-preview-screen">
-              <div className="configurator-card-preview-ui is-top" />
-              <div className="configurator-card-preview-ui is-main" />
-              <div className="configurator-card-preview-ui is-side" />
+              <img
+                className="configurator-card-preview-image"
+                src={previewArtwork.src}
+                alt={previewArtwork.alt}
+                loading="lazy"
+                decoding="async"
+              />
+              <div
+                className="configurator-card-preview-image-sheen"
+                aria-hidden="true"
+              />
               <div className="configurator-card-preview-glow" />
             </div>
           </div>
@@ -62,20 +76,4 @@ export default function ItemCard({
       </div>
     </button>
   );
-}
-
-function getPreviewVariant(item) {
-  if (item.id.includes("3d")) return "orbital";
-  if (item.id.includes("payment")) return "checkout";
-  if (item.id.includes("booking")) return "calendar";
-  if (item.id.includes("user-accounts")) return "account";
-  if (item.id.includes("multilanguage")) return "translation";
-  if (item.id.includes("cms")) return "dashboard";
-  if (item.id.includes("portfolio")) return "gallery";
-  if (item.id.includes("contact")) return "contact";
-  if (item.id.includes("about")) return "story";
-  if (item.id.includes("philosophy")) return "manifesto";
-  if (item.id.includes("animation")) return "motion";
-  if (item.id.includes("micro")) return "micro";
-  return item.type === "page" ? "page" : "feature";
 }

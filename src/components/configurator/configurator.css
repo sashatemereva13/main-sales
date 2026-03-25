@@ -446,6 +446,29 @@
   overflow: hidden;
 }
 
+.configurator-card-preview-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.01);
+}
+
+.configurator-card-preview-image-sheen {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      140deg,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0.02) 34%,
+      rgba(255, 255, 255, 0) 58%
+    ),
+    linear-gradient(180deg, rgba(6, 24, 13, 0.02), rgba(6, 24, 13, 0.24));
+  pointer-events: none;
+}
+
 .configurator-card-preview-ui {
   position: absolute;
   left: 12%;
@@ -500,6 +523,24 @@
   left: 10%;
   right: 10%;
   height: 10%;
+}
+
+.configurator-card-preview.is-dashboard .configurator-card-preview-screen,
+.configurator-card-preview.is-translation .configurator-card-preview-screen,
+.configurator-card-preview.is-account .configurator-card-preview-screen {
+  border-radius: 22px;
+}
+
+.configurator-card-preview.is-gallery .configurator-card-preview-screen,
+.configurator-card-preview.is-story .configurator-card-preview-screen,
+.configurator-card-preview.is-manifesto .configurator-card-preview-screen,
+.configurator-card-preview.is-page .configurator-card-preview-screen {
+  width: 82%;
+}
+
+.configurator-card-preview.is-contact .configurator-card-preview-screen,
+.configurator-card-preview.is-checkout .configurator-card-preview-screen {
+  width: 80%;
 }
 
 .configurator-card-preview.is-dashboard .configurator-card-preview-ui.is-main {
