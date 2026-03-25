@@ -60,10 +60,10 @@ export default function LandingScene({
       <ParallaxRig
         disabled={profile.capabilities.isMobile || isConfiguratorActive}
       >
-        <PavilionFeature preserveGlass={profile.pavilion.preserveGlass} />
+        {/* <PavilionFeature preserveGlass={profile.pavilion.preserveGlass} /> */}
         <Ground />
         <TreesFeature profile={profile} />
-        {/* <GrassField profile={profile} paused={isConfiguratorActive} /> */}
+        <GrassField profile={profile} paused={isConfiguratorActive} />
         {/* <MeadowRoad /> */}
         {/* <RabbitsFeature profile={profile} paused={wildlifePaused} /> */}
       </ParallaxRig>
