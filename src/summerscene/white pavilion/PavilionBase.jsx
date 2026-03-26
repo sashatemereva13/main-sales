@@ -19,24 +19,24 @@ export default function PavilionBase({
         rimMaterial={terraceRimMaterial}
       />
       <mesh position={[0, 0.22, 0]} material={shellMaterial} receiveShadow>
-        <cylinderGeometry args={[8.9, 11.1, 2.34, 88]} />
+        <cylinderGeometry args={[10.8, 13.6, 2.5, 88]} />
       </mesh>
       <mesh position={[0, 0.74, 0]} material={whiteFrameMaterial}>
-        <torusGeometry args={[8.45, 0.34, 28, 180]} />
+        <torusGeometry args={[10.05, 0.38, 28, 180]} />
       </mesh>
       <mesh position={[0, 0.82, 0]} material={lawnMaterial} receiveShadow>
-        <cylinderGeometry args={[7.85, 9.65, 0.48, 88]} />
+        <cylinderGeometry args={[9.35, 11.65, 0.54, 88]} />
       </mesh>
       <mesh
-        position={[0, 2.08, 0]}
+        position={[0, 2.18, 0]}
         material={shellMaterial}
         castShadow
         receiveShadow
       >
-        <cylinderGeometry args={[6.1, 7.5, 2.9, 72]} />
+        <cylinderGeometry args={[7.8, 9.3, 3.15, 72]} />
       </mesh>
-      <mesh position={[0, 2.74, 1.28]} material={glassMaterial}>
-        <cylinderGeometry args={[3.05, 3.72, 1.52, 72, 1, false, 0, Math.PI]} />
+      <mesh position={[0, 2.9, 1.56]} material={glassMaterial}>
+        <cylinderGeometry args={[3.55, 4.3, 1.68, 72, 1, false, 0, Math.PI]} />
       </mesh>
       <EntryScreen preserveGlass={preserveGlass} />
     </>

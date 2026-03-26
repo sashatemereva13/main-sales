@@ -4,6 +4,7 @@ import Lighting from "./environment/Lighting";
 import { PavilionFeature } from "./pavilion";
 import Ground from "../summerscene/Ground";
 import GrassField from "./grass/GrassField";
+import Trees from "../summerscene/Trees";
 import CameraController from "../questioneer/CameraController";
 
 export default function LandingScene({
@@ -49,6 +50,7 @@ export default function LandingScene({
       <Lighting profile={profile} />
       <Ground />
       <GrassField profile={profile} paused={false} />
+      <Trees count={3} />
       <PavilionFeature preserveGlass={profile.pavilion.preserveGlass} />
     </SceneCanvas>
   );

@@ -148,7 +148,7 @@ const FRAGMENT_SHADER = `
 
   void main() {
     vec4 tex = texture2D(uGrassTex, vUv);
-    if (tex.a < 0.28) discard;
+    if (tex.a < 0.2) discard;
 
     vec3 color = tex.rgb;
 
@@ -404,7 +404,7 @@ function populateGrassLayer({
 
     const height =
       (size.hMin + Math.random() * size.hVar) * (0.95 + Math.random() * 0.1);
-    const width = (size.wMin + Math.random() * size.wVar) * 1.45;
+    const width = (size.wMin + Math.random() * size.wVar) * 2.05;
 
     const yaw = Math.random() * Math.PI;
 
@@ -464,8 +464,8 @@ export default function GrassBlades({
     [count, variantCount],
   );
   const foregroundCount = Math.max(
-    quality === "low" ? 6500 : 14000,
-    Math.floor(count * (quality === "low" ? 0.24 : 0.34)),
+    quality === "low" ? 9000 : 18000,
+    Math.floor(count * (quality === "low" ? 0.34 : 0.48)),
   );
 
   const baseMeshARefs = useRef([]);
@@ -498,13 +498,13 @@ export default function GrassBlades({
   );
 
   const geometryBase = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1.34, 2.15, 1, baseSegments);
+    const g = new THREE.PlaneGeometry(1.72, 2.28, 1, baseSegments);
     g.translate(0, 1.075, 0);
     return g;
   }, [baseSegments]);
 
   const geometryForeground = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1.94, 2.95, 1, fgSegments);
+    const g = new THREE.PlaneGeometry(2.52, 3.18, 1, fgSegments);
     g.translate(0, 1.475, 0);
     return g;
   }, [fgSegments]);
@@ -543,12 +543,12 @@ export default function GrassBlades({
       meshB: fgMeshBRef.current,
       count: foregroundCount,
       zRange: [
-        MEADOW_ISLAND_CENTER[1] - (MEADOW_ISLAND_RADIUS - 10),
-        MEADOW_ISLAND_CENTER[1] + (MEADOW_ISLAND_RADIUS - 10),
+        MEADOW_ISLAND_CENTER[1] - (MEADOW_ISLAND_RADIUS + 4),
+        MEADOW_ISLAND_CENTER[1] + (MEADOW_ISLAND_RADIUS + 4),
       ],
       xRange: [
-        MEADOW_ISLAND_CENTER[0] - (MEADOW_ISLAND_RADIUS - 10),
-        MEADOW_ISLAND_CENTER[0] + (MEADOW_ISLAND_RADIUS - 10),
+        MEADOW_ISLAND_CENTER[0] - (MEADOW_ISLAND_RADIUS + 4),
+        MEADOW_ISLAND_CENTER[0] + (MEADOW_ISLAND_RADIUS + 4),
       ],
       fields: GRASS_ISLAND_FIELDS,
       size: {
@@ -618,7 +618,7 @@ export default function GrassBlades({
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,
     transparent: !conservative,
-    alphaTest: 0.28,
+    alphaTest: 0.2,
     depthWrite: conservative,
     side: crossLayers ? THREE.FrontSide : THREE.DoubleSide,
   };

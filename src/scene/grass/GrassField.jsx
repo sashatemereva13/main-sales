@@ -9,7 +9,7 @@ function mapQuality(quality) {
 export default function GrassField({ profile, paused = false }) {
   return (
     <OriginalGrassField
-      count={profile.grass.count}
+      count={Math.floor(profile.grass.count * 1.4)}
       quality={mapQuality(profile.quality)}
       paused={paused}
       hoverEnabled={!profile.capabilities.isMobile}

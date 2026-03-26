@@ -14,7 +14,7 @@ export const WHITE_PAVILION_WORLD_POSITION = Object.freeze([
 ]);
 
 export const WHITE_PAVILION_SCREEN_GROUP_POSITION = Object.freeze([
-  -3, 3.22, 10.42,
+  0, 3.7, 4.55,
 ]);
 const WHITE_PAVILION_SCREEN_CENTER_LOCAL = Object.freeze([0, 1.08, 0.12]);
 
