@@ -8,13 +8,20 @@ export function usePerformanceProfile() {
     const updateProfile = () => {
       setProfile(createPerformanceProfile());
     };
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection ||
+      null;
 
     window.addEventListener("resize", updateProfile);
     window.addEventListener("orientationchange", updateProfile);
+    connection?.addEventListener?.("change", updateProfile);
 
     return () => {
       window.removeEventListener("resize", updateProfile);
       window.removeEventListener("orientationchange", updateProfile);
+      connection?.removeEventListener?.("change", updateProfile);
     };
   }, []);
 

@@ -38,7 +38,7 @@ function App() {
   const [sceneResetToken, setSceneResetToken] = useState(0);
   const labLaunchTimeoutRef = useRef(null);
 
-  const landingCameraTarget = [0, 10.6, 46];
+  const landingCameraTarget = [0, 8.6, 80];
   const introCameraStart = [-90, 80, 220];
   const introCameraDuration = 5.2;
   const introLookAtEnd = WHITE_PAVILION_LOOK_AT_POSITION;

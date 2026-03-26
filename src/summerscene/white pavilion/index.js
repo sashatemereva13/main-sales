@@ -3,6 +3,6 @@ export {
   WHITE_PAVILION_INTERIOR_LOOK_AT_POSITION,
   WHITE_PAVILION_LOOK_AT_POSITION,
   WHITE_PAVILION_WORLD_POSITION,
-} from "../../summerscene/white pavilion";
+} from "./constants";
 
-export { default as PavilionFeature } from "../../summerscene/white pavilion";
+export { default } from "./WhitePavilion";

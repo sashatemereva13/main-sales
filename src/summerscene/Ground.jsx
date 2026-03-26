@@ -14,7 +14,7 @@ export default function Ground() {
     const pos = geo.attributes.position;
     const colors = [];
     const color = new THREE.Color();
-    const baseGreen = new THREE.Color("#4c8f1f");
+    const baseGreen = new THREE.Color("#507f2f");
     const lushGreen = new THREE.Color();
     const flowerTint = new THREE.Color();
 
@@ -60,13 +60,13 @@ export default function Ground() {
       const blossomBands = Math.max(flowerRibbonA, flowerRibbonB, flowerRibbonC);
 
       lushGreen.setRGB(
-        THREE.MathUtils.lerp(0.14, 0.22, patchwork),
-        THREE.MathUtils.lerp(0.34, 0.56, terraceBands),
-        THREE.MathUtils.lerp(0.05, 0.12, patchwork),
+        THREE.MathUtils.lerp(0.16, 0.24, patchwork),
+        THREE.MathUtils.lerp(0.4, 0.62, terraceBands),
+        THREE.MathUtils.lerp(0.06, 0.14, patchwork),
       );
 
-      color.copy(baseGreen).lerp(lushGreen, 0.56 + innerMask * 0.22);
-      color.multiplyScalar(THREE.MathUtils.lerp(0.92, 1.08, contourLift));
+      color.copy(baseGreen).lerp(lushGreen, 0.66 + innerMask * 0.18);
+      color.multiplyScalar(THREE.MathUtils.lerp(0.97, 1.09, contourLift));
 
       if (blossomBands > 0.08) {
         flowerTint.set(blossomBands > 0.52 ? "#f6afc8" : "#f4c7da");
@@ -76,8 +76,12 @@ export default function Ground() {
         );
       }
 
-      const rimFade = THREE.MathUtils.smoothstep(MEADOW_ISLAND_RADIUS * 0.82, MEADOW_ISLAND_RADIUS, radial);
-      color.multiplyScalar(THREE.MathUtils.lerp(1.03, 0.95, rimFade));
+      const rimFade = THREE.MathUtils.smoothstep(
+        MEADOW_ISLAND_RADIUS * 0.82,
+        MEADOW_ISLAND_RADIUS,
+        radial,
+      );
+      color.multiplyScalar(THREE.MathUtils.lerp(1.01, 0.98, rimFade));
 
       colors.push(color.r, color.g, color.b);
     }
@@ -113,8 +117,8 @@ export default function Ground() {
           vertexColors
           roughness={1}
           metalness={0}
-          emissive="#2a2317"
-          emissiveIntensity={0.03}
+          emissive="#29461f"
+          emissiveIntensity={0.08}
         />
       </mesh>
 

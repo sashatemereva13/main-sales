@@ -1,15 +1,14 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { MEADOW_ROAD_PATH_XZ } from "./meadowRoadPath";
 import {
   MEADOW_ISLAND_CENTER,
   MEADOW_ISLAND_RADIUS,
 } from "./meadowIslandConfig";
 import { sampleMeadowSurfaceHeight } from "./terrainSurface";
 
-const GROUND_Y_OFFSET = -0.42;
-const TEX_VARIANTS = 3;
+const GROUND_Y_OFFSET = -1.42;
+const TEX_VARIANTS = 7;
 const GRASS_COLOR_PRESETS = Object.freeze({
   skyMonochrome: Object.freeze({
     textureHueShift: -18,
@@ -34,8 +33,36 @@ const GRASS_COLOR_PRESETS = Object.freeze({
 });
 
 const ACTIVE_GRASS_COLOR_PRESET = "skyComplementary";
-const GRASS_COLOR_CONTROLS =
-  GRASS_COLOR_PRESETS[ACTIVE_GRASS_COLOR_PRESET];
+const GRASS_COLOR_CONTROLS = GRASS_COLOR_PRESETS[ACTIVE_GRASS_COLOR_PRESET];
+const GRASS_TEXTURE_VARIANT_CONFIGS = Object.freeze([
+  Object.freeze({
+    blades: 54,
+    hueBase: 99,
+    hueJitter: 9,
+    petals: 76,
+    densityAlpha: 0.18,
+    leafWidth: 6.6,
+    chunk: 30,
+  }),
+  Object.freeze({
+    blades: 62,
+    hueBase: 101,
+    hueJitter: 8,
+    petals: 64,
+    densityAlpha: 0.14,
+    leafWidth: 7.2,
+    chunk: 27,
+  }),
+  Object.freeze({
+    blades: 48,
+    hueBase: 96,
+    hueJitter: 10,
+    petals: 92,
+    densityAlpha: 0.2,
+    leafWidth: 7.8,
+    chunk: 35,
+  }),
+]);
 
 function hexToShaderVec3(hex) {
   const color = new THREE.Color(hex);
@@ -121,7 +148,7 @@ const FRAGMENT_SHADER = `
 
   void main() {
     vec4 tex = texture2D(uGrassTex, vUv);
-    if (tex.a < 0.38) discard;
+    if (tex.a < 0.28) discard;
 
     vec3 color = tex.rgb;
 
@@ -162,72 +189,24 @@ const FRAGMENT_SHADER = `
   }
 `;
 
-function distToSegmentSqXZ(px, pz, ax, az, bx, bz) {
-  const abx = bx - ax;
-  const abz = bz - az;
-  const apx = px - ax;
-  const apz = pz - az;
-  const denom = abx * abx + abz * abz || 1;
-  const t = THREE.MathUtils.clamp((apx * abx + apz * abz) / denom, 0, 1);
-  const cx = ax + abx * t;
-  const cz = az + abz * t;
-  const dx = px - cx;
-  const dz = pz - cz;
-  return dx * dx + dz * dz;
-}
-
-function inRoadClearing(x, z) {
-  // Keep the path readable, but hug the road tighter so the meadow doesn't look over-cleared.
-  const roadHalfWidth = z > -12 ? 1.0 : z > -45 ? 0.5 : z > -90 ? 2.35 : 1.95;
-  const shoulderPadding = z > -45 ? 0.8 : 0.6;
-  const clearanceRadius = roadHalfWidth + shoulderPadding;
-  const clearanceSq = clearanceRadius * clearanceRadius;
-
-  for (let i = 0; i < MEADOW_ROAD_PATH_XZ.length - 1; i++) {
-    const [ax, az] = MEADOW_ROAD_PATH_XZ[i];
-    const [bx, bz] = MEADOW_ROAD_PATH_XZ[i + 1];
-    if (distToSegmentSqXZ(x, z, ax, az, bx, bz) <= clearanceSq) return true;
-  }
-
-  return false;
-}
-
 function createGrassClusterTexture(variant = 0, anisotropy = 4) {
   const canvas = document.createElement("canvas");
   canvas.width = 256;
   canvas.height = 256;
   const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    const fallbackTexture = new THREE.Texture(canvas);
+    fallbackTexture.needsUpdate = true;
+    return fallbackTexture;
+  }
   ctx.clearRect(0, 0, 256, 256);
 
-  const variantConfig = [
-    {
-      blades: 54,
-      hueBase: 99,
-      hueJitter: 9,
-      petals: 76,
-      densityAlpha: 0.18,
-      leafWidth: 6.6,
-      chunk: 30,
-    },
-    {
-      blades: 62,
-      hueBase: 101,
-      hueJitter: 8,
-      petals: 64,
-      densityAlpha: 0.14,
-      leafWidth: 7.2,
-      chunk: 27,
-    },
-    {
-      blades: 48,
-      hueBase: 96,
-      hueJitter: 10,
-      petals: 92,
-      densityAlpha: 0.2,
-      leafWidth: 7.8,
-      chunk: 35,
-    },
-  ][variant % TEX_VARIANTS];
+  const variantConfig =
+    GRASS_TEXTURE_VARIANT_CONFIGS[
+      ((variant % GRASS_TEXTURE_VARIANT_CONFIGS.length) +
+        GRASS_TEXTURE_VARIANT_CONFIGS.length) %
+        GRASS_TEXTURE_VARIANT_CONFIGS.length
+    ];
   const hueShift = GRASS_COLOR_CONTROLS.textureHueShift;
   const satBoost = GRASS_COLOR_CONTROLS.textureSaturationBoost;
   const lightBoost = GRASS_COLOR_CONTROLS.textureLightnessBoost;
@@ -346,6 +325,20 @@ function allocateCounts(total, ratios) {
   });
 }
 
+function halton(index, base) {
+  let result = 0;
+  let fraction = 1 / base;
+  let i = index;
+
+  while (i > 0) {
+    result += fraction * (i % base);
+    i = Math.floor(i / base);
+    fraction /= base;
+  }
+
+  return result;
+}
+
 function populateGrassLayer({
   meshA,
   meshB,
@@ -358,18 +351,36 @@ function populateGrassLayer({
   tempColor,
   dummyA,
   dummyB,
-  depthBias = 1,
 }) {
   if (!meshA || count <= 0) return;
 
   const [minZ, maxZ] = zRange;
   const [minX, maxX] = xRange;
   let placed = 0;
-  const maxAttempts = count * 14;
+  const maxAttempts = count * 20;
+  const spanX = maxX - minX;
+  const spanZ = maxZ - minZ;
+  const candidateArea = Math.max(spanX * spanZ, 1);
+  const estimatedSpacing = Math.sqrt(candidateArea / Math.max(count, 1));
+  const jitterX = Math.min(spanX * 0.035, estimatedSpacing * 0.55);
+  const jitterZ = Math.min(spanZ * 0.035, estimatedSpacing * 0.55);
 
   for (let attempt = 0; attempt < maxAttempts && placed < count; attempt += 1) {
-    const x = THREE.MathUtils.lerp(minX, maxX, Math.random());
-    const z = THREE.MathUtils.lerp(minZ, maxZ, Math.random());
+    // A low-discrepancy sequence fills the meadow more evenly than pure random sampling,
+    // while a small offset keeps the result from looking like a grid.
+    const sampleIndex = attempt + 1;
+    const x = THREE.MathUtils.clamp(
+      THREE.MathUtils.lerp(minX, maxX, halton(sampleIndex, 2)) +
+        (halton(sampleIndex, 5) - 0.5) * jitterX,
+      minX,
+      maxX,
+    );
+    const z = THREE.MathUtils.clamp(
+      THREE.MathUtils.lerp(minZ, maxZ, halton(sampleIndex, 3)) +
+        (halton(sampleIndex, 7) - 0.5) * jitterZ,
+      minZ,
+      maxZ,
+    );
 
     if (fields?.length) {
       const insideAnyField = fields.some((field) => {
@@ -389,13 +400,11 @@ function populateGrassLayer({
       if (insideClearing) continue;
     }
 
-    if (inRoadClearing(x, z)) continue;
-
     const terrainY = sampleMeadowSurfaceHeight(x, z) + GROUND_Y_OFFSET;
 
     const height =
       (size.hMin + Math.random() * size.hVar) * (0.95 + Math.random() * 0.1);
-    const width = (size.wMin + Math.random() * size.wVar) * 1.28;
+    const width = (size.wMin + Math.random() * size.wVar) * 1.45;
 
     const yaw = Math.random() * Math.PI;
 
@@ -431,7 +440,7 @@ function populateGrassLayer({
 }
 
 export default function GrassBlades({
-  count = 7200,
+  count = 9000,
   quality = "high",
   paused = false,
   hoverEnabled = true,
@@ -455,8 +464,8 @@ export default function GrassBlades({
     [count, variantCount],
   );
   const foregroundCount = Math.max(
-    quality === "low" ? 4500 : 10000,
-    Math.floor(count * (quality === "low" ? 0.18 : 0.26)),
+    quality === "low" ? 6500 : 14000,
+    Math.floor(count * (quality === "low" ? 0.24 : 0.34)),
   );
 
   const baseMeshARefs = useRef([]);
@@ -489,13 +498,13 @@ export default function GrassBlades({
   );
 
   const geometryBase = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1.16, 2.15, 1, baseSegments);
+    const g = new THREE.PlaneGeometry(1.34, 2.15, 1, baseSegments);
     g.translate(0, 1.075, 0);
     return g;
   }, [baseSegments]);
 
   const geometryForeground = useMemo(() => {
-    const g = new THREE.PlaneGeometry(1.52, 2.95, 1, fgSegments);
+    const g = new THREE.PlaneGeometry(1.94, 2.95, 1, fgSegments);
     g.translate(0, 1.475, 0);
     return g;
   }, [fgSegments]);
@@ -553,7 +562,6 @@ export default function GrassBlades({
       tempColor,
       dummyA,
       dummyB,
-      depthBias: 0.85,
     });
   }, [
     baseVariantCounts,
@@ -610,7 +618,7 @@ export default function GrassBlades({
     vertexShader: VERTEX_SHADER,
     fragmentShader: FRAGMENT_SHADER,
     transparent: !conservative,
-    alphaTest: 0.38,
+    alphaTest: 0.28,
     depthWrite: conservative,
     side: crossLayers ? THREE.FrontSide : THREE.DoubleSide,
   };

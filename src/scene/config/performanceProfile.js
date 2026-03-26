@@ -6,7 +6,7 @@ const PERFORMANCE_PRESETS = Object.freeze({
     shadows: false,
     shadowMapSize: 512,
     grass: Object.freeze({
-      count: 6000,
+      count: 9000,
       bladeWidth: 1.1,
       bladeHeight: 2.0,
       segments: 3,
@@ -34,7 +34,7 @@ const PERFORMANCE_PRESETS = Object.freeze({
     shadows: false,
     shadowMapSize: 768,
     grass: Object.freeze({
-      count: 12000,
+      count: 18000,
       bladeWidth: 1.18,
       bladeHeight: 2.2,
       segments: 4,
@@ -62,7 +62,7 @@ const PERFORMANCE_PRESETS = Object.freeze({
     shadows: true,
     shadowMapSize: 1024,
     grass: Object.freeze({
-      count: 18000,
+      count: 26000,
       bladeWidth: 1.22,
       bladeHeight: 2.35,
       segments: 5,
@@ -91,11 +91,16 @@ function detectCapabilities() {
       isMobile: false,
       isTablet: false,
       isWebKit: false,
+      isAppleMobileGpu: false,
       cores: 8,
       memory: 8,
       coarsePointer: false,
       width: 1440,
       height: 900,
+      connectionEffectiveType: "4g",
+      connectionDownlink: 10,
+      connectionRtt: 50,
+      saveData: false,
     };
   }
 
@@ -103,14 +108,17 @@ function detectCapabilities() {
   const height = window.innerHeight;
   const ua = navigator.userAgent || "";
   const platform = navigator.platform || "";
+  const connection =
+    navigator.connection ||
+    navigator.mozConnection ||
+    navigator.webkitConnection ||
+    null;
   const coarsePointer =
     window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
   const isMobile =
     /Android|iPhone|iPod|Mobile|Windows Phone/i.test(ua) ||
-    (coarsePointer && Math.min(width, height) < 900);
-  const isTablet =
-    /iPad|Tablet/i.test(ua) ||
-    (coarsePointer && !isMobile && Math.max(width, height) <= 1368);
+    /iPad/i.test(ua);
+  const isTablet = /iPad|Tablet/i.test(ua);
   const isWebKit =
     /AppleWebKit/i.test(ua) &&
     !/Chrome|Chromium|CriOS|Edg|OPR|Firefox|FxiOS/i.test(ua);
@@ -128,22 +136,37 @@ function detectCapabilities() {
     height,
     cores: navigator.hardwareConcurrency ?? 8,
     memory: navigator.deviceMemory ?? 8,
+    connectionEffectiveType: connection?.effectiveType ?? "4g",
+    connectionDownlink: connection?.downlink ?? 10,
+    connectionRtt: connection?.rtt ?? 50,
+    saveData: connection?.saveData ?? false,
   };
 }
 
 export function createPerformanceProfile() {
   const capabilities = detectCapabilities();
+  const lowBandwidth =
+    capabilities.saveData ||
+    capabilities.connectionEffectiveType === "slow-2g" ||
+    capabilities.connectionEffectiveType === "2g" ||
+    capabilities.connectionDownlink <= 0.8 ||
+    capabilities.connectionRtt >= 700;
+  const mediumBandwidth =
+    lowBandwidth ||
+    capabilities.connectionEffectiveType === "3g" ||
+    capabilities.connectionDownlink <= 1.5 ||
+    capabilities.connectionRtt >= 300;
   const lowPower =
-    capabilities.isMobile ||
     capabilities.isWebKit ||
     capabilities.isAppleMobileGpu ||
     capabilities.cores <= 4 ||
-    capabilities.memory <= 4;
+    capabilities.memory <= 4 ||
+    lowBandwidth;
   const midPower =
-    capabilities.isTablet ||
     capabilities.isWebKit ||
     capabilities.cores <= 8 ||
-    capabilities.memory <= 8;
+    capabilities.memory <= 8 ||
+    mediumBandwidth;
 
   const preset = lowPower
     ? PERFORMANCE_PRESETS.low
@@ -157,6 +180,8 @@ export function createPerformanceProfile() {
     flags: Object.freeze({
       lowPower,
       midPower,
+      lowBandwidth,
+      mediumBandwidth,
     }),
   });
 }
