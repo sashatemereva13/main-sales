@@ -1,235 +1,31 @@
-export const UI_COPY = {
-  fr: {
-    nav: {
-      studioHud: "Studio HUD",
-      meadowLive: "Meadow Live",
-      tagline: "Des expériences digitales personnalisées",
-      scene: "Scène",
-      quiz: "Quiz",
-      configurator: "Configurateur",
-      websiteLab: "Laboratoire",
-      recommendation: "Recommandation",
-      openChannels: "Canaux ouverts",
-      localeFr: "FR",
-      localeEn: "EN",
-      localeLabel: "Langue",
-      navTabsAria: "Onglets de navigation",
-    },
-    intro: {
-      discoverySession: "Session de découverte",
-      welcome: "Bienvenue",
-      studio: "Studio",
-      process: "Processus",
-      studioEnvironment: "Environnement studio",
-      available: "Disponible",
-      subtitle: "Des sites strategiques qui convertissent",
-      startQuiz: "Website Builder",
-      ctaMeta: "3 min • plan web personnalise",
-      heroKicker: "Laboratoire créatif digital",
-      heroTitle: "Des experiences web pensees comme des systemes vivants",
-      heroLead:
-        "Entre direction artistique, technologie sensible et strategie claire, nous concevons des sites qui semblent deja en mouvement.",
-      heroMetrics: ["Direction artistique", "Systemes interactifs", "Narration digitale"],
-      heroTabsAria: "Onglets d’accueil",
-      scrollHint: "Scroll down",
-      annotations: {
-        presents: "Amber Composition Studio",
-        format: "sites web",
-        type: "premium",
-        lineNote: "La philosophie de marque traduite en présence digitale",
-      },
-    },
-    quiz: {
-      validFormat: "Veuillez entrer un format valide.",
-      submitErrorRetry:
-        "Une erreur est survenue pendant l'envoi. Réessayez dans quelques instants.",
-      submitErrorUnavailable:
-        "Impossible d'envoyer votre recommandation pour le moment.",
-      summaryLoadingKicker: "Préparation",
-      summaryLoadingTitle: "J'assemble votre recommandation",
-      summaryLoadingText:
-        "Je relis vos réponses et je compose une proposition adaptée à votre projet.",
-      summaryTitle: "Voici ce que je vous proposerais",
-      summaryLead:
-        "Merci {firstName}. Votre parcours dans le studio est terminé, voici une direction claire pour la suite.",
-      summaryAria: "Résumé du parcours",
-      answersCount: "{count} réponses",
-      questionsCount: "{count} questions",
-      themesCount: "{count} thèmes",
-      tierEyebrow: "Recommandation",
-      deliveryLabel: "Envoi de votre recommandation",
-      deliveryNote:
-        "Vous pourrez revenir en arrière pour ajuster une réponse avant l'envoi.",
-      answersDetails: "Voir le détail de vos réponses",
-      submitPending: "Envoi en cours... je prépare votre recommandation.",
-      sendingButton: "Envoi en cours...",
-      thankYou:
-        "Merci. Votre recommandation personnalisée sera envoyée très bientôt à {recipient}.",
-      editAnswers: "Modifier mes réponses",
-      receiveRecommendation: "Recevoir cette recommandation",
-      loadingRecipientFallback: "votre email",
-      firstNameFallback: "vous",
-      questionLabel: "Question",
-      preparingPhase: "preparing",
-    },
-    quizStep: {
-      emailPlaceholder: "votre@email.com",
-      urlPlaceholder: "https://...",
-      textPlaceholder: "Ce que vous ressentez...",
-      enterToContinue: "Entrée pour continuer",
-      continue: "continuer →",
-      skip: "passer →",
-    },
-    progress: {
-      step: "Étape",
-      question: "Question",
-      routeLabel: "Parcours stratégique",
-    },
-    quizNav: {
-      back: "← retour",
-      question: "Question",
-    },
-    configurator: {
-      eyebrow: "Laboratoire du site",
-      title: "Composez votre site comme une collection sur-mesure",
-      subtitle:
-        "Choisissez les modules, le niveau de présence digitale et les outils dont votre site a besoin.",
-      searchPlaceholder: "Rechercher une fonctionnalité",
-      allCategories: "Tout",
-      resultsLabel: "{count} modules disponibles",
-      selectedCount: "{count} sélectionnés",
-      emptyResults: "Aucun module ne correspond à votre recherche.",
-      summaryTitle: "Votre sélection",
-      summarySubtitle: "Estimation en direct pour votre configuration actuelle",
-      totalLabel: "Total estimé",
-      summaryEmpty:
-        "Ajoutez quelques modules pour construire votre configuration.",
-      mobileSummaryButton: "Voir le résumé",
-      includedLabel: "Inclus",
-      categories: {
-        looks: "Identité visuelle",
-        functionality: "Fonctionnalités",
-        page: "Pages",
-        feature: "Modules",
-      },
-    },
-  },
-  en: {
-    nav: {
-      studioHud: "Studio HUD",
-      meadowLive: "Meadow Live",
-      tagline: "Custom digital experiences",
-      scene: "Scene",
-      quiz: "Quiz",
-      configurator: "Configurator",
-      websiteLab: "Website Lab",
-      recommendation: "Recommendation",
-      openChannels: "Open channels",
-      localeFr: "FR",
-      localeEn: "EN",
-      localeLabel: "Language",
-      navTabsAria: "Navigation tabs",
-    },
-    intro: {
-      discoverySession: "Discovery Session",
-      welcome: "Welcome",
-      studio: "Studio",
-      process: "Process",
-      studioEnvironment: "Studio Environment",
-      available: "Available",
-      subtitle: "Websites that attract",
-      startQuiz: "Website Builder",
-      ctaMeta: "3 min • personalized web plan",
-      heroKicker: "Creative digital laboratory",
-      heroTitle: "Web experiences designed like living systems",
-      heroLead:
-        "Between art direction, sensitive technology, and strategic clarity, we craft websites that already feel in motion.",
-      heroMetrics: ["Art direction", "Interactive systems", "Digital storytelling"],
-      heroTabsAria: "Hero tabs",
-      scrollHint: "Scroll down",
-      annotations: {
-        presents: "Amber Composition Studio",
-        format: "Premium websites and immersive digital experiences ",
-        type: "for brands, artists, and founders with a point of view",
-        lineNote: "Brand philosophy, translated into digital presence",
-      },
-    },
-    quiz: {
-      validFormat: "Please enter a valid format.",
-      submitErrorRetry:
-        "An error occurred while sending. Please try again in a moment.",
-      submitErrorUnavailable: "Your recommendation cannot be sent right now.",
-      summaryLoadingKicker: "Preparing",
-      summaryLoadingTitle: "I'm assembling your recommendation",
-      summaryLoadingText:
-        "I'm reviewing your answers and preparing a proposal tailored to your project.",
-      summaryTitle: "Here is what I would recommend",
-      summaryLead:
-        "Thank you, {firstName}. Your studio journey is complete, and here is a clear direction for what comes next.",
-      summaryAria: "Journey summary",
-      answersCount: "{count} answers",
-      questionsCount: "{count} questions",
-      themesCount: "{count} themes",
-      tierEyebrow: "Recommendation",
-      deliveryLabel: "Send your recommendation to",
-      deliveryNote: "You can go back and adjust an answer before sending.",
-      answersDetails: "View your answers",
-      submitPending: "Sending... preparing your recommendation.",
-      sendingButton: "Sending...",
-      thankYou:
-        "Thank you. Your personalized recommendation will be sent very soon to {recipient}.",
-      editAnswers: "Edit my answers",
-      receiveRecommendation: "Receive this recommendation",
-      loadingRecipientFallback: "your email",
-      firstNameFallback: "you",
-      questionLabel: "Question",
-      preparingPhase: "preparing",
-    },
-    quizStep: {
-      emailPlaceholder: "your@email.com",
-      urlPlaceholder: "https://...",
-      textPlaceholder: "What you're feeling...",
-      enterToContinue: "Press Enter to continue",
-      continue: "continue →",
-      skip: "skip →",
-    },
-    progress: {
-      step: "Step",
-      question: "Question",
-      routeLabel: "Strategy path",
-    },
-    quizNav: {
-      back: "← back",
-      question: "Question",
-    },
-    configurator: {
-      eyebrow: "Website laboratory",
-      title: "you design your digital presence, i build it",
-      subtitle:
-        "Choose the modules, the level of digital presence, and the tools your site needs.",
-      searchPlaceholder: "Search for a feature",
-      allCategories: "All",
-      resultsLabel: "{count} modules available",
-      selectedCount: "{count} selected",
-      emptyResults: "No modules match your current search.",
-      summaryTitle: "Your selection",
-      summarySubtitle: "Live estimate for your current configuration",
-      totalLabel: "Estimated total",
-      summaryEmpty: "Add a few modules to start building your website.",
-      mobileSummaryButton: "View summary",
-      includedLabel: "Included",
-      categories: {
-        looks: "Looks",
-        functionality: "Functionality",
-        page: "Pages",
-        feature: "Features",
-      },
-    },
-  },
-};
+import en from "./en";
+import fr from "./fr";
 
-export function getCopy(locale = "fr") {
-  return UI_COPY[locale] || UI_COPY.fr;
+export const DEFAULT_LOCALE = "fr";
+export const SUPPORTED_LOCALES = Object.freeze(["fr", "en"]);
+
+export const UI_COPY = Object.freeze({
+  fr,
+  en,
+});
+
+export function isSupportedLocale(locale) {
+  return SUPPORTED_LOCALES.includes(locale);
+}
+
+export function normalizeLocale(locale) {
+  return isSupportedLocale(locale) ? locale : DEFAULT_LOCALE;
+}
+
+export function getCopy(locale = DEFAULT_LOCALE) {
+  return UI_COPY[normalizeLocale(locale)];
+}
+
+export function getLocaleOptions(copy) {
+  return SUPPORTED_LOCALES.map((value) => ({
+    value,
+    label: value === "fr" ? copy.nav.localeFr : copy.nav.localeEn,
+  }));
 }
 
 export function formatCopy(template, vars = {}) {

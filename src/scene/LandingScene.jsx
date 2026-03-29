@@ -2,6 +2,7 @@ import SceneCanvas from "./core/SceneCanvas";
 import SkyDome from "./environment/SkyDome";
 import Lighting from "./environment/Lighting";
 import { PavilionFeature } from "./pavilion";
+import CloudSea from "../summerscene/CloudSea";
 import Ground from "../summerscene/Ground";
 import GrassField from "./grass/GrassField";
 import Trees from "../summerscene/Trees";
@@ -33,7 +34,7 @@ export default function LandingScene({
       onContextLost={onContextLost}
       onContextRestored={onContextRestored}
     >
-      <fog attach="fog" args={["#efb48d", 165, 560]} />
+      <fog attach="fog" args={["#f3be86", 130, 620]} />
       <CameraController
         target={cameraTarget}
         introStart={introCameraStart}
@@ -48,6 +49,7 @@ export default function LandingScene({
       />
       <SkyDome />
       <Lighting profile={profile} />
+      <CloudSea />
       <Ground />
       <GrassField profile={profile} paused={false} />
       <Trees count={3} />

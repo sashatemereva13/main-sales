@@ -15,7 +15,7 @@ function formatPrice(value, locale) {
   }).format(value);
 }
 
-export default function Configurator({ locale = "fr" }) {
+export default function Configurator({ locale = "fr", embedded = false }) {
   const copy = getCopy(locale);
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -79,8 +79,32 @@ export default function Configurator({ locale = "fr" }) {
         : copy.configurator.categories?.[category] ?? category,
   }));
 
+  const mobileBarLabel = embedded
+    ? copy.configurator.totalLabel
+    : copy.configurator.mobileSummaryButton;
+
+  const mobileBar = (
+    <button
+      type="button"
+      className={`configurator-mobile-bar ${embedded ? "is-readonly" : ""}`}
+      onClick={() => {
+        if (!embedded) {
+          setIsSummaryOpen(true);
+        }
+      }}
+      aria-label={mobileBarLabel}
+      disabled={embedded}
+      aria-disabled={embedded}
+    >
+      <span className="configurator-mobile-bar-label">{mobileBarLabel}</span>
+      <span className="configurator-mobile-bar-total">{formattedTotalPrice}</span>
+    </button>
+  );
+
   return (
-    <section className="configurator-shell">
+    <section className={`configurator-shell ${embedded ? "is-embedded" : ""}`}>
+      {embedded ? mobileBar : null}
+
       <div className="configurator-surface">
         <header className="configurator-header configurator-reveal configurator-reveal-1">
           <p className="configurator-eyebrow">{copy.configurator.eyebrow}</p>
@@ -140,16 +164,7 @@ export default function Configurator({ locale = "fr" }) {
         </div>
       </div>
 
-      <button
-        type="button"
-        className="configurator-mobile-bar"
-        onClick={() => setIsSummaryOpen(true)}
-      >
-        <span className="configurator-mobile-bar-label">
-          {copy.configurator.mobileSummaryButton}
-        </span>
-        <span className="configurator-mobile-bar-total">{formattedTotalPrice}</span>
-      </button>
+      {!embedded ? mobileBar : null}
 
       <SummaryPanel
         locale={locale}

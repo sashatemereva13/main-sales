@@ -6,7 +6,7 @@ export const WHITE_PAVILION_BASE_Y =
     WHITE_PAVILION_CENTER[0],
     WHITE_PAVILION_CENTER[1],
   ) + 2.8;
-export const WHITE_PAVILION_SCALE = Object.freeze([2.54, 3.18, 3.1]);
+export const WHITE_PAVILION_SCALE = Object.freeze([2.54, 1.18, 3.1]);
 export const WHITE_PAVILION_WORLD_POSITION = Object.freeze([
   WHITE_PAVILION_CENTER[0],
   WHITE_PAVILION_BASE_Y,

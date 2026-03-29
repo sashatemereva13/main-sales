@@ -14,7 +14,7 @@ export default function Ground() {
     const pos = geo.attributes.position;
     const colors = [];
     const color = new THREE.Color();
-    const baseGreen = new THREE.Color("#507f2f");
+    const baseGreen = new THREE.Color("#5a9840");
     const lushGreen = new THREE.Color();
     const flowerTint = new THREE.Color();
 
@@ -60,13 +60,13 @@ export default function Ground() {
       const blossomBands = Math.max(flowerRibbonA, flowerRibbonB, flowerRibbonC);
 
       lushGreen.setRGB(
-        THREE.MathUtils.lerp(0.16, 0.24, patchwork),
-        THREE.MathUtils.lerp(0.4, 0.62, terraceBands),
-        THREE.MathUtils.lerp(0.06, 0.14, patchwork),
+        THREE.MathUtils.lerp(0.2, 0.32, patchwork),
+        THREE.MathUtils.lerp(0.48, 0.72, terraceBands),
+        THREE.MathUtils.lerp(0.08, 0.16, patchwork),
       );
 
-      color.copy(baseGreen).lerp(lushGreen, 0.66 + innerMask * 0.18);
-      color.multiplyScalar(THREE.MathUtils.lerp(0.97, 1.09, contourLift));
+      color.copy(baseGreen).lerp(lushGreen, 0.72 + innerMask * 0.2);
+      color.multiplyScalar(THREE.MathUtils.lerp(1.01, 1.16, contourLift));
 
       if (blossomBands > 0.08) {
         flowerTint.set(blossomBands > 0.52 ? "#f6afc8" : "#f4c7da");
@@ -81,7 +81,7 @@ export default function Ground() {
         MEADOW_ISLAND_RADIUS,
         radial,
       );
-      color.multiplyScalar(THREE.MathUtils.lerp(1.01, 0.98, rimFade));
+      color.multiplyScalar(THREE.MathUtils.lerp(1.03, 0.97, rimFade));
 
       colors.push(color.r, color.g, color.b);
     }
@@ -115,10 +115,10 @@ export default function Ground() {
       >
         <meshStandardMaterial
           vertexColors
-          roughness={1}
+          roughness={0.94}
           metalness={0}
-          emissive="#29461f"
-          emissiveIntensity={0.08}
+          emissive="#2f5a2f"
+          emissiveIntensity={0.12}
         />
       </mesh>
 
@@ -131,11 +131,11 @@ export default function Ground() {
         frustumCulled={false}
       >
         <meshStandardMaterial
-          color="#3f5d2a"
-          roughness={0.98}
+          color="#4c6f36"
+          roughness={0.94}
           metalness={0}
-          emissive="#1d170f"
-          emissiveIntensity={0.02}
+          emissive="#293223"
+          emissiveIntensity={0.03}
           side={THREE.DoubleSide}
         />
       </mesh>

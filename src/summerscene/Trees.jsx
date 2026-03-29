@@ -57,7 +57,6 @@ function prepareTreeTemplate(scene) {
 
   root.traverse((child) => {
     if (!child.isMesh) return;
-
     child.castShadow = true;
     child.receiveShadow = true;
 
@@ -66,7 +65,6 @@ function prepareTreeTemplate(scene) {
     const darkenMaterial = (mat) => {
       const m = mat.clone();
 
-      // darker
       if (m.color) m.color.multiplyScalar(0.45);
       m.roughness =
         m.roughness !== undefined ? Math.min(1, m.roughness + 0.25) : 0.9;
@@ -84,12 +82,14 @@ function prepareTreeTemplate(scene) {
       child.material = darkenMaterial(child.material);
     }
   });
+
   return root;
 }
 
 export default function Trees({ count = 5 }) {
   const swayRefs = useRef([]);
   const { scene } = useGLTF("/glb/maple_tree.glb");
+
   const trees = useMemo(() => {
     return TREE_POSITIONS.slice(0, count).map((t, i) => {
       const depthFactor = THREE.MathUtils.clamp((-t.z - 8) / 210, 0, 1);

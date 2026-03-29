@@ -1,5 +1,24 @@
 import "./css/nav.css";
-import { getCopy } from "./i18n/copy";
+import { getCopy, getLocaleOptions, normalizeLocale } from "./i18n/copy";
+
+export const NAV_SOCIAL_LINKS = [
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/13xsasha/",
+  },
+  {
+    label: "Email",
+    href: "mailto:sashatemereva13@gmail.com",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/sashatemereva/",
+  },
+  {
+    label: "Awwwards",
+    href: "https://www.awwwards.com/sasha-temereva-13/",
+  },
+];
 
 const Nav = ({
   reveal = true,
@@ -7,19 +26,25 @@ const Nav = ({
   locale = "fr",
   onLocaleChange,
   onBackToLanding,
+  title,
   subtitle,
   showPrimaryCta = false,
   primaryCtaLabel,
   onPrimaryCta,
   ctaMeta,
 }) => {
-  const copy = getCopy(locale);
+  const currentLocale = normalizeLocale(locale);
+  const copy = getCopy(currentLocale);
+  const localeOptions = getLocaleOptions(copy);
   const showConfiguratorNav = activeTab === "configurator";
   const showDetailNav = showConfiguratorNav || activeTab === "quiz";
+  const showIntroNav = !reveal && activeTab === "scene";
+  const showHeroNav = reveal && !showDetailNav;
+  const showLocaleSwitch = !showDetailNav && !showIntroNav;
 
   return (
     <nav
-      className={`navigation ${reveal ? "is-revealed" : ""} ${showDetailNav ? "is-quiz-nav" : ""} ${showConfiguratorNav ? "is-builder-surface" : ""}`}
+      className={`navigation ${reveal ? "is-revealed" : ""} ${showIntroNav ? "is-intro-surface" : ""} ${showHeroNav ? "is-hero-surface" : ""} ${showDetailNav ? "is-quiz-nav" : ""} ${showConfiguratorNav ? "is-builder-surface" : ""}`}
     >
       <div className="nav-panel">
         <div className="nav-brand-block" aria-label="amber composition">
@@ -27,6 +52,17 @@ const Nav = ({
         </div>
 
         <div className="nav-panel-center">
+          {showIntroNav ? (
+            <div className="nav-intro-stack">
+              <p className="nav-intro-kicker">{copy.intro.discoverySession}</p>
+              <div className="nav-intro-pills" aria-label={copy.nav.openChannels}>
+                <span className="nav-intro-pill">{copy.nav.studioHud}</span>
+                <span className="nav-intro-pill">{copy.nav.meadowLive}</span>
+              </div>
+              <p className="nav-intro-hint">{copy.nav.tagline}</p>
+            </div>
+          ) : null}
+
           {showDetailNav ? (
             <>
               <div className="nav-tab-row" aria-label={copy.nav.navTabsAria}>
@@ -39,13 +75,19 @@ const Nav = ({
                     : copy.nav.recommendation}
                 </span>
               </div>
+              {showConfiguratorNav ? (
+                <p className="nav-context-note">{copy.configurator.subtitle}</p>
+              ) : (
+                <p className="nav-context-note">{copy.nav.tagline}</p>
+              )}
             </>
           ) : (
             <></>
           )}
 
-          {!showDetailNav && (subtitle || showPrimaryCta) ? (
+          {!showDetailNav && (title || subtitle || showPrimaryCta) ? (
             <div className="nav-decision-block">
+              {title ? <p className="nav-title">{title}</p> : null}
               {subtitle ? <p className="nav-subtitle">{subtitle}</p> : null}
 
               {showPrimaryCta ? (
@@ -83,32 +125,27 @@ const Nav = ({
                 {copy.quizNav.back}
               </button>
             ) : null}
-            {!showDetailNav ? (
+            {showLocaleSwitch ? (
               <div
                 className="nav-locale-switch"
                 role="group"
                 aria-label={copy.nav.localeLabel}
               >
                 <span
-                  className={`nav-locale-pill ${locale === "en" ? "is-en" : "is-fr"}`}
+                  className={`nav-locale-pill ${currentLocale === "en" ? "is-en" : "is-fr"}`}
                   aria-hidden="true"
                 />
-                <button
-                  type="button"
-                  className={`nav-locale-btn ${locale === "fr" ? "is-active" : ""}`}
-                  onClick={() => onLocaleChange?.("fr")}
-                  aria-pressed={locale === "fr"}
-                >
-                  {copy.nav.localeFr}
-                </button>
-                <button
-                  type="button"
-                  className={`nav-locale-btn ${locale === "en" ? "is-active" : ""}`}
-                  onClick={() => onLocaleChange?.("en")}
-                  aria-pressed={locale === "en"}
-                >
-                  {copy.nav.localeEn}
-                </button>
+                {localeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`nav-locale-btn ${currentLocale === option.value ? "is-active" : ""}`}
+                    onClick={() => onLocaleChange?.(option.value)}
+                    aria-pressed={currentLocale === option.value}
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
             ) : null}
           </div>

@@ -1,29 +1,35 @@
 import { useRef } from "react";
-import { WHITE_PAVILION_SCALE, WHITE_PAVILION_WORLD_POSITION } from "./constants";
-import PavilionBase from "./PavilionBase";
-import PavilionCrown from "./PavilionCrown";
-import PavilionTower from "./PavilionTower";
-import usePavilionAnimation from "./usePavilionAnimation";
-import usePavilionGeometries from "./usePavilionGeometries";
-import usePavilionMaterials from "./usePavilionMaterials";
+import {
+  WHITE_PAVILION_SCALE,
+  WHITE_PAVILION_WORLD_POSITION,
+} from "./constants";
+import SanctuaryBase from "./SanctuaryBase";
+import SanctuaryFacade from "./SanctuaryFacade";
+import SanctuarySpire from "./SanctuarySpire";
+import useSanctuaryAnimation from "./useSanctuaryAnimation";
+import useSanctuaryGeometries from "./useSanctuaryGeometries";
+import useSanctuaryMaterials from "./useSanctuaryMaterials";
 
 export default function WhitePavilion({ preserveGlass = true }) {
-  const towerRef = useRef(null);
   const crownRef = useRef(null);
-  const glowRingRef = useRef(null);
-  const terraceClusterRef = useRef(null);
-  const materials = usePavilionMaterials(preserveGlass);
-  const geometries = usePavilionGeometries();
+  const portalGlowRef = useRef(null);
+  const materials = useSanctuaryMaterials(preserveGlass);
+  const geometries = useSanctuaryGeometries();
 
-  usePavilionAnimation({ towerRef, crownRef, glowRingRef, terraceClusterRef });
+  useSanctuaryAnimation({ crownRef, portalGlowRef });
 
   return (
-    <group position={WHITE_PAVILION_WORLD_POSITION} scale={WHITE_PAVILION_SCALE}>
-      <group ref={towerRef}>
-        <PavilionBase preserveGlass={preserveGlass} terraceClusterRef={terraceClusterRef} {...materials} />
-        <PavilionTower {...materials} {...geometries} />
-        <PavilionCrown crownRef={crownRef} glowRingRef={glowRingRef} {...materials} />
-      </group>
+    <group
+      position={WHITE_PAVILION_WORLD_POSITION}
+      scale={WHITE_PAVILION_SCALE}
+    >
+      <SanctuaryBase {...materials} {...geometries} />
+      <SanctuaryFacade
+        portalGlowRef={portalGlowRef}
+        {...materials}
+        {...geometries}
+      />
+      <SanctuarySpire crownRef={crownRef} {...materials} {...geometries} />
     </group>
   );
 }
